@@ -2,6 +2,8 @@
 
 A simple implementation of socket based Shogi and Go boards.
 
+Deployed: [Shogi or Go](http://hiteshlala.biz:6543)
+
 * No rules implemented
 * Users can join a game 2 person
 * Users can move any pieces
@@ -14,4 +16,5 @@ A simple implementation of socket based Shogi and Go boards.
   * Can create a game
     * Start a new game 
   
+
 
