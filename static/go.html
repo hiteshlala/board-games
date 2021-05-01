@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="icon.png" />
+    <link rel="stylesheet" href="normalize.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shogi or Go</title>
+  </head>
+  <body>
+    <h1>Shogi or Go</h1>
+    <div>
+      <h4>Ongoing Games</h4>
+      <ul id="games-list"></ul>
+    </div>
+
+    <div>
+      <h4>Join a game or start a new one</h4>
+      <p> Enter your name <input type="text" id="name"> </p>
+
+      <div>
+        <h5>Awaiting Second Player</h5>
+        <ul id="await-games-list"></ul>
+        <p><input type="button" value="Join" id="join" disabled onclick="joinGame()"/></p>
+      </div>
+
+      <div>
+        <h5>Create New Game</h5>
+        <p> 
+          <input type="radio" name="game" id="game-shogi" value="Shogi" checked>
+          <label for="game-shogi">Shogi</label>
+        </p>
+        <p> 
+          <input type="radio" name="game" id="game-go" value="Go"/> 
+          <label for="game-go">Go</label>
+        </p>
+        <p><input type="button" value="Start" id="start" disabled onclick="startGame()"/></p>
+      </div>
+
+    </div>
+
+    <script src="req.js"></script>
+
+    <script>
+      const gameList = document.getElementById( 'games-list' );
+      const awaitList = document.getElementById( 'await-games-list' );
+      const shogi = document.getElementById( 'game-shogi' );
+      const go = document.getElementById( 'game-go' );
+      const start = document.getElementById( 'start' );
+      const name = document.getElementById( 'name' );
+      const join = document.getElementById( 'join' );
+
+      let canStart = false;
+      let canJoin = false;
+      let gameIdToJoin = '';
+
+      name.oninput  = function() { 
+        canStart = name.value.length > 0;
+        canStart ? (start.disabled = false) : (start.disabled = true);
+        gameIdToJoin ? (join.disabled = !canStart) : (join.disabled = true );
+      };
+
+      function startGame() {
+        if ( canStart ) {
+          console.log( 'create a new game')
+          console.log( 'name', name.value);
+          console.log( 'shogi', shogi.checked );
+          console.log( 'go', go.checked );
+          
+        }
+      }
+
+      function joinGame() {
+        if ( canStart && canJoin ) {
+          console.log( 'join game')
+          console.log( 'name', name.value);
+          console.log( 'game id', gameIdToJoin )
+        }
+      }
+
+
+      window.onload = async function() {
+        const {started, created } = await getRequest( '/games' );
+        started.forEach( game => {
+          const a = document.createElement( 'a' );
+          a.href = `/games/${game.id}`;
+
+          const li = document.createElement( 'li' );
+          li.innerText = `${game.game} played by ${game.name1} and ${game.name2}`;
+          li.id = game.id;
+
+          a.appendChild( li );
+          gameList.appendChild( a );
+        });
+
+        created.forEach( game => {
+          const li = document.createElement( 'li' );
+
+          const input = document.createElement( 'input' );
+          input.type = 'radio';
+          input.name = 'await-game';
+          input.id = `game-${game.id}`;
+          input.value = game.id;
+          input.onclick = function () { 
+            gameIdToJoin = game.id;
+            canJoin = true;
+            join.disabled = !(canJoin && canStart);
+          };
+
+          const label = document.createElement( 'label' );
+          label.for = `game-${game.id}`;
+          label.innerText = `${game.game} played by ${game.name1} and ...you ?`;
+
+          li.appendChild( input );
+          li.appendChild( label );
+          awaitList.appendChild( li );
+        });
+      };
+
+    </script>
+  </body>
+</html>

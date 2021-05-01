@@ -1,0 +1,19 @@
+{
+  "name": "board-games",
+  "version": "1.0.0",
+  "description": "A simple implementation of socket based Shogi and Go boards.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Hitesh Lala",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.13.1",
+    "koa-body": "^4.2.0",
+    "koa-router": "^10.0.0",
+    "koa-static": "^5.0.0",
+    "ws": "^7.4.5"
+  }
+}

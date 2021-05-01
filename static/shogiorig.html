@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/icon.png" />
+    <link rel="stylesheet" href="/normalize.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shogi or Go</title>
+    <style>
+      /* * {
+        box-sizing: border-box;
+        padding: 0px;
+        margin: 0px;
+      } */
+      .shogi-board {
+        border: 2px solid brown;
+        width: fit-content;
+        background-color: burlywood;
+      }
+      .shogi-row {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+      }
+      .shogi-row div {
+        width: 52px;
+        height: 52px;
+        border: 1px solid brown;
+        flex-grow: 0;
+        flex-shrink: 0;
+      }
+      canvas {
+        border: 1px solid black;
+        background-color: burlywood;
+      }
+      .shogi-piece {
+        width: 52px;
+        height: 52px;
+        /* background: no-repeat center /80% url('shogipiece.png'); */
+        line-height: 52px;
+        text-align: center;
+        border: none !important;
+      }
+      .upsidedown {
+        transform: rotate(180deg);
+      }
+      .large {
+        background: no-repeat center url('/shogipiece.png');
+      }
+      .medium {
+        background: no-repeat center /80% url('/shogipiece.png');
+      }
+      .small {
+        background: no-repeat center /70% url('/shogipiece.png');
+      }
+
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="/icon.png">
+      <p> Shogi or Go</p>
+      <img src="/icon.png">
+    </header>
+    <div class="content">
+
+      <div>
+        <h4>Shogi game between:</h4>
+        <ol>
+          <li id="p1"></li>
+          <li id="p2"></li>
+        </ol>
+      </div>
+    
+      <div class="shogi-board" id="board">
+        <div class="shogi-row">
+          <div class="shogi-square" data-y="0" data-x="0"></div>
+          <div class="shogi-square" data-y="0" data-x="1"></div>
+          <div class="shogi-square" data-y="0" data-x="2"></div>
+          <div class="shogi-square" data-y="0" data-x="3"></div>
+          <div class="shogi-square" data-y="0" data-x="4"></div>
+          <div class="shogi-square" data-y="0" data-x="5"></div>
+          <div class="shogi-square" data-y="0" data-x="6"></div>
+          <div class="shogi-square" data-y="0" data-x="7"></div>
+          <div class="shogi-square" data-y="0" data-x="8"></div>
+        </div>
+        <div class="shogi-row">
+          <div class="shogi-square" data-y="1" data-x="0"></div>
+          <div class="shogi-square" data-y="1" data-x="1"></div>
+          <div class="shogi-square" data-y="1" data-x="2"></div>
+          <div class="shogi-square" data-y="1" data-x="3"></div>
+          <div class="shogi-square" data-y="1" data-x="4"></div>
+          <div class="shogi-square" data-y="1" data-x="5"></div>
+          <div class="shogi-square" data-y="1" data-x="6"></div>
+          <div class="shogi-square" data-y="1" data-x="7"></div>
+          <div class="shogi-square" data-y="1" data-x="8"></div>
+        </div>
+        <div class="shogi-row">
+          <div class="shogi-square" data-y="2" data-x="0"></div>
+          <div class="shogi-square" data-y="2" data-x="1"></div>
+          <div class="shogi-square" data-y="2" data-x="2"></div>
+          <div class="shogi-square" data-y="2" data-x="3"></div>
+          <div class="shogi-square" data-y="2" data-x="4"></div>
+          <div class="shogi-square" data-y="2" data-x="5"></div>
+          <div class="shogi-square" data-y="2" data-x="6"></div>
+          <div class="shogi-square" data-y="2" data-x="7"></div>
+          <div class="shogi-square" data-y="2" data-x="8"></div>
+        </div>
+        <div class="shogi-row">
+          <div class="shogi-square" data-y="3" data-x="0"></div>
+          <div class="shogi-square" data-y="3" data-x="1"></div>
+          <div class="shogi-square" data-y="3" data-x="2"></div>
+          <div class="shogi-square" data-y="3" data-x="3"></div>
+          <div class="shogi-square" data-y="3" data-x="4"></div>
+          <div class="shogi-square" data-y="3" data-x="5"></div>
+          <div class="shogi-square" data-y="3" data-x="6"></div>
+          <div class="shogi-square" data-y="3" data-x="7"></div>
+          <div class="shogi-square" data-y="3" data-x="8"></div>
+        </div>
+        <div class="shogi-row">
+          <div class="shogi-square" data-y="4" data-x="0"></div>
+          <div class="shogi-square" data-y="4" data-x="1"></div>
+          <div class="shogi-square" data-y="4" data-x="2"></div>
+          <div class="shogi-square" data-y="4" data-x="3"></div>
+          <div class="shogi-square" data-y="4" data-x="4"></div>
+          <div class="shogi-square" data-y="4" data-x="5"></div>
+          <div class="shogi-square" data-y="4" data-x="6"></div>
+          <div class="shogi-square" data-y="4" data-x="7"></div>
+          <div class="shogi-square" data-y="4" data-x="8"></div>
+        </div>
+        <div class="shogi-row">
+          <div class="shogi-square" data-y="5" data-x="0"></div>
+          <div class="shogi-square" data-y="5" data-x="1"></div>
+          <div class="shogi-square" data-y="5" data-x="2"></div>
+          <div class="shogi-square" data-y="5" data-x="3"></div>
+          <div class="shogi-square" data-y="5" data-x="4"></div>
+          <div class="shogi-square" data-y="5" data-x="5"></div>
+          <div class="shogi-square" data-y="5" data-x="6"></div>
+          <div class="shogi-square" data-y="5" data-x="7"></div>
+          <div class="shogi-square" data-y="5" data-x="8"></div>
+        </div>
+        <div class="shogi-row">
+          <div class="shogi-square" data-y="6" data-x="0"></div>
+          <div class="shogi-square" data-y="6" data-x="1"></div>
+          <div class="shogi-square" data-y="6" data-x="2"></div>
+          <div class="shogi-square" data-y="6" data-x="3"></div>
+          <div class="shogi-square" data-y="6" data-x="4"></div>
+          <div class="shogi-square" data-y="6" data-x="5"></div>
+          <div class="shogi-square" data-y="6" data-x="6"></div>
+          <div class="shogi-square" data-y="6" data-x="7"></div>
+          <div class="shogi-square" data-y="6" data-x="8"></div>
+        </div>
+        <div class="shogi-row">
+          <div class="shogi-square" data-y="7" data-x="0"></div>
+          <div class="shogi-square" data-y="7" data-x="1"></div>
+          <div class="shogi-square" data-y="7" data-x="2"></div>
+          <div class="shogi-square" data-y="7" data-x="3"></div>
+          <div class="shogi-square" data-y="7" data-x="4"></div>
+          <div class="shogi-square" data-y="7" data-x="5"></div>
+          <div class="shogi-square" data-y="7" data-x="6"></div>
+          <div class="shogi-square" data-y="7" data-x="7"></div>
+          <div class="shogi-square" data-y="7" data-x="8"></div>
+        </div>
+        <div class="shogi-row">
+          <div class="shogi-square" data-y="8" data-x="0"></div>
+          <div class="shogi-square" data-y="8" data-x="1"></div>
+          <div class="shogi-square" data-y="8" data-x="2"></div>
+          <div class="shogi-square" data-y="8" data-x="3"></div>
+          <div class="shogi-square" data-y="8" data-x="4"></div>
+          <div class="shogi-square" data-y="8" data-x="5"></div>
+          <div class="shogi-square" data-y="8" data-x="6"></div>
+          <div class="shogi-square" data-y="8" data-x="7"></div>
+          <div class="shogi-square" data-y="8" data-x="8"></div>
+        </div>
+      </div>
+
+      <div>
+        <h4>Player 1 Captures</h4>
+        <div id="player1Captures" class="rowlist"></div>
+      </div>
+
+      <div>
+        <h4>Player 2 Captures</h4>
+        <div id="player2Captures" class="rowlist"></div>
+      </div>
+
+      <div>
+        <input type="button" value="redraw" onclick="redraw()"/>
+      </div>
+
+      <div>
+        <input type="checkbox" value="japanese" onchange="language()" /> Japanese
+      </div>
+
+    </div>
+
+
+
+    
+    <!-- <script src="req.js"></script> -->
+    
+    <!-- 
+    <canvas width=52 height=52 id="canvas"></canvas>
+    <script>
+      // used to create shogi piece background
+      const can = document.getElementById( 'canvas' );
+      const ctx = can.getContext( '2d' );
+      ctx.lineWidth = 2;
+      ctx.fillStyle = 'ivory';
+      ctx.beginPath();
+      ctx.moveTo( 26, 4 );
+      ctx.lineTo( 43, 18 );
+      ctx.lineTo( 47, 48 );
+      ctx.lineTo( 5, 48 );
+      ctx.lineTo( 8, 18 );
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fill();
+    </script> 
+    -->
+
+    <script>
+      const p1cap = document.getElementById( 'player1Captures' );
+      const p2cap = document.getElementById( 'player2Captures' );
+
+      const board = document.getElementById( 'board' );
+      const rows = Array.prototype.filter.call( board.childNodes, i => {
+        return i.className === 'shogi-row';
+      })
+      .map( r => {
+        const cols = Array.prototype.filter.call( r.childNodes, i => {
+          return i.className === 'shogi-square';
+        });
+        return cols;
+      });
+
+      let showJap = false;
+
+      const japChar = {
+        L: '香', // 香車	
+        LL: '杏', // 成香 this one is diff 
+        N: '桂', // 桂馬
+        NN: '圭', // 成桂 also diff
+        S: '銀', // 銀將
+        SS: '全', // 	成銀
+        B: '角', // 角行
+        BB: '馬', // 龍馬
+        R: '飛', //'飛車'
+        RR: '龍', // 龍王
+        P: '歩', // 歩兵
+        PP: 'と', // と金
+        G: '金', // 金將
+        GG: '金', 
+        K: '王', // 王將
+        KK: '王', 
+      };
+
+
+      const pieces = [
+        { owner: 'player1', x: 0, y: 8, promoted: false, id: `p1-L-0-8`, name: 'L', size: 'medium' },
+        { owner: 'player1', x: 1, y: 8, promoted: false, id: `p1-N-1-8`, name: 'N', size: 'medium' },
+        { owner: 'player1', x: 2, y: 8, promoted: false, id: `p1-S-2-8`, name: 'S', size: 'medium' },
+        { owner: 'player1', x: 3, y: 8, promoted: false, id: `p1-G-3-8`, name: 'G', size: 'medium' },
+        { owner: 'player1', x: 4, y: 8, promoted: false, id: `p1-K-4-8`, name: 'K', size: 'large' },
+        { owner: 'player1', x: 5, y: 8, promoted: false, id: `p1-G-5-8`, name: 'G', size: 'medium' },
+        { owner: 'player1', x: 6, y: 8, promoted: false, id: `p1-S-6-8`, name: 'S', size: 'medium' },
+        { owner: 'player1', x: 7, y: 8, promoted: false, id: `p1-N-7-8`, name: 'N', size: 'medium' },
+        { owner: 'player1', x: 8, y: 8, promoted: false, id: `p1-L-8-8`, name: 'L', size: 'medium' },
+        { owner: 'player1', x: 1, y: 7, promoted: false, id: `p1-B-1-7`, name: 'B', size: 'large' },
+        { owner: 'player1', x: 7, y: 7, promoted: false, id: `p1-R-7-7`, name: 'R', size: 'large' },
+        { owner: 'player1', x: 0, y: 6, promoted: false, id: `p1-P-0-6`, name: 'P', size: 'small' },
+        { owner: 'player1', x: 1, y: 6, promoted: false, id: `p1-P-1-6`, name: 'P', size: 'small' },
+        { owner: 'player1', x: 2, y: 6, promoted: false, id: `p1-P-2-6`, name: 'P', size: 'small' },
+        { owner: 'player1', x: 3, y: 6, promoted: false, id: `p1-P-3-6`, name: 'P', size: 'small' },
+        { owner: 'player1', x: 4, y: 6, promoted: false, id: `p1-P-4-6`, name: 'P', size: 'small' },
+        { owner: 'player1', x: 5, y: 6, promoted: false, id: `p1-P-5-6`, name: 'P', size: 'small' },
+        { owner: 'player1', x: 6, y: 6, promoted: false, id: `p1-P-6-6`, name: 'P', size: 'small' },
+        { owner: 'player1', x: 7, y: 6, promoted: false, id: `p1-P-7-6`, name: 'P', size: 'small' },
+        { owner: 'player1', x: 8, y: 6, promoted: false, id: `p1-P-8-6`, name: 'P', size: 'small' },
+
+        { owner: 'player2', x: 0, y: 0, promoted: true, id: `p2-L-0-0`, name: 'L', size: 'medium' },
+        { owner: 'player2', x: 1, y: 0, promoted: true, id: `p2-N-1-0`, name: 'N', size: 'medium' },
+        { owner: 'player2', x: 2, y: 0, promoted: true, id: `p2-S-2-0`, name: 'S', size: 'medium' },
+        { owner: 'player2', x: 3, y: 0, promoted: true, id: `p2-G-3-0`, name: 'G', size: 'medium' },
+        { owner: 'player2', x: 4, y: 0, promoted: true, id: `p2-K-4-0`, name: 'K', size: 'large' },
+        { owner: 'player2', x: 5, y: 0, promoted: true, id: `p2-G-5-0`, name: 'G', size: 'medium' },
+        { owner: 'player2', x: 6, y: 0, promoted: true, id: `p2-S-6-0`, name: 'S', size: 'medium' },
+        { owner: 'player2', x: 7, y: 0, promoted: true, id: `p2-N-7-0`, name: 'N', size: 'medium' },
+        { owner: 'player2', x: 8, y: 0, promoted: true, id: `p2-L-8-0`, name: 'L', size: 'medium' },
+        { owner: 'player2', x: 7, y: 1, promoted: true, id: `p2-B-7-1`, name: 'B', size: 'large' },
+        { owner: 'player2', x: 1, y: 1, promoted: true, id: `p2-R-1-1`, name: 'R', size: 'large' },
+        { owner: 'player2', x: 0, y: 2, promoted: true, id: `p2-P-0-2`, name: 'P', size: 'small' },
+        { owner: 'player2', x: 1, y: 2, promoted: true, id: `p2-P-1-2`, name: 'P', size: 'small' },
+        { owner: 'player2', x: 2, y: 2, promoted: true, id: `p2-P-2-2`, name: 'P', size: 'small' },
+        { owner: 'player2', x: 3, y: 2, promoted: true, id: `p2-P-3-2`, name: 'P', size: 'small' },
+        { owner: 'player2', x: 4, y: 2, promoted: true, id: `p2-P-4-2`, name: 'P', size: 'small' },
+        { owner: 'player2', x: 5, y: 2, promoted: true, id: `p2-P-5-2`, name: 'P', size: 'small' },
+        { owner: 'player2', x: 6, y: 2, promoted: true, id: `p2-P-6-2`, name: 'P', size: 'small' },
+        { owner: 'player2', x: 7, y: 2, promoted: true, id: `p2-P-7-2`, name: 'P', size: 'small' },
+        { owner: 'player2', x: 8, y: 2, promoted: true, id: `p2-P-8-2`, name: 'P', size: 'small' },
+      ];
+
+      const player1Pieces = [];
+      const player2Pieces = [];
+
+      function redraw( ) {
+        clearBoard();
+        pieces.forEach( p => {
+          const div = document.createElement( 'div' );
+          div.id = p.id;
+          div.innerText = showJap ? ( p.promoted ? japChar[`${p.name}${p.name}`]: japChar[p.name]) : p.name;
+          div.classList.add( 'shogi-piece' );
+          div.classList.add( p.size );
+          ( p.owner === 'player2' ) && div.classList.add( 'upsidedown' );
+          p.promoted && ( div.style.color = 'red');
+          div.draggable = true;
+          div.addEventListener( 'dragstart', (ev) => {
+            ev.dataTransfer.setData( 'text/plain', p.id );
+            ev.dataTransfer.dropEffect = 'move';
+          });
+          div.addEventListener( 'mousedown', (ev) => {
+            ev.shiftKey && (p.promoted = !p.promoted);
+            div.style.color = p.promoted ? 'red' : 'black';
+            div.innerText = showJap ? ( p.promoted ? japChar[`${p.name}${p.name}`]: japChar[p.name]) : p.name;
+            // TODO: send request
+          })
+          
+          // TODO: this has to be inverted for other player
+          const mom = rows[ p.y ][ p.x ];
+          mom.appendChild( div );
+        });
+      }
+
+      // setup the drop squares
+      rows.forEach( cols => {
+        cols.forEach( square => {
+          square.ondragover = (ev) => {
+            ev.preventDefault();
+            square.style.borderColor = 'green';
+          };
+          square.ondragleave = (ev) => {
+            ev.preventDefault();
+            square.style.borderColor = 'brown';
+          };
+          square.ondrop = (ev) => {
+            ev.preventDefault();
+
+            if ( /shogi-piece/.test( ev.target.className ) ) {
+              const capture = ev.target;
+              square.removeChild( capture );
+
+              capture.classList.remove( 'upsidedown' );
+              let index = -1;
+              const captureData = pieces.find((i,idx ) => {
+                if ( i.id === capture.id ) {
+                  i.owner = 'player1';
+                  i.x = -1;
+                  i.y = -1;
+                  i.promoted = false;
+                  index = idx;
+                  return true;
+                }
+              });
+              player1Pieces.push( captureData );
+              pieces.splice( index, 1 );
+
+              p1cap.appendChild( capture );
+
+            }
+
+            const id = ev.dataTransfer.getData( 'text/plain' );
+            const piece = document.getElementById( id );
+            square.appendChild( piece );
+
+            const movedData = pieces.find( i => i.id === id );
+            movedData.x = parseInt( square.dataset.x );
+            movedData.y = parseInt( square.dataset.y );
+
+            square.style.borderColor = 'brown';
+
+
+            // TODO: send request
+          };
+          
+        });
+      })
+
+      window.onload = () => {
+        redraw();
+      }
+
+      function clearBoard() {
+        rows.forEach( cols => {
+          cols.forEach( square => {
+            Array.prototype.forEach.call( square.childNodes, c => {
+              square.removeChild( c );
+            });
+          });
+        })
+      }
+
+      function language() {
+        showJap = !showJap;
+        redraw();
+      }
+
+      
+
+
+      
+      
+
+
+    </script>
+  </body>
+</html>
