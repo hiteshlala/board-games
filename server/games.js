@@ -24,7 +24,12 @@ games.post( '/games', ctx => {
   const canNotCreateGame = (type !== 'go' && type !== 'shogi') || ( !player || player.length === 0 );
   if ( canNotCreateGame ) {
     ctx.body = {
-      message: 'Game type and player name required'
+      message: 'Game type and player name required.'
+    };
+  }
+  else if ( !gameDb.canCreateNewGame ) {
+    ctx.body = {
+      message: 'Number of supported games exceeded, try again later.'
     };
   }
   else {

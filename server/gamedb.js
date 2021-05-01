@@ -1,37 +1,9 @@
-const {
-  createRandomKey,
-  durations
-} = require('./utils');
+const { durations } = require('./utils');
 const Shogi = require('./shogi');
+const Go = require( './go' );
 
 const gameTooOld = (durations.minute * 45);
-
-class Go {
-  constructor(player1) {
-    this.id = createRandomKey();
-    this.type = 'go';
-    this.player1 = player1;
-    this.lastUpated = Date.now();
-    this.sockets = [];
-  }
-  onSocketMessage() {}
-  onSocketClose() {}
-  onSocketError() {}
-  end() {
-    this.sockets.forEach( socket => {
-      if ( socket ) {
-        socket.close();
-        socket = undefined;
-      }
-    });
-  }
-  restart() {
-    this.lastUpated = Date.now();
-  }
-  get started() {
-    return this.player1 && this.player2;
-  }
-}
+const maxGames = 50;
 
 class GameDB {
   constructor() {
@@ -41,6 +13,10 @@ class GameDB {
 
   getGame(id) {
     return this.games[id];
+  }
+
+  get canCreateNewGame() {
+    return Object.keys(this.games).length <= maxGames;
   }
 
   createGame(type, player1) {
@@ -98,8 +74,6 @@ class GameDB {
     });
 
   }
-
-
 
 }
 
