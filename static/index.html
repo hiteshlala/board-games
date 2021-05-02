@@ -6,6 +6,34 @@
     <link rel="stylesheet" href="normalize.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Shogi or Go</title>
+    <style>
+      svg {
+        width: 14px;
+        height: 14px;
+        margin-left: 40px;
+        transform: translateY(8px);
+      }
+      svg:hover {
+        cursor: pointer
+      }
+      .left-space {
+        margin-left: 46px;
+      }
+      .small-note {
+        padding: 0px;
+        padding-left: 26px;
+        margin: 0px;
+        font-size: 10px;
+      }
+      .title {
+        margin-bottom: 2px;
+      }
+      .message {
+        padding: 0px;
+        margin: 0px 46px;
+        font-size: 14px;
+      }
+    </style>
   </head>
   <body>
     <header>
@@ -17,31 +45,48 @@
     </header>
     <div class="content">
       <div>
-        <h4>Ongoing Games  <input type="button" value="Refresh"  onclick="init()"/></h4>
+        <!-- <h4>Ongoing Games  <input type="button" value="Refresh"  onclick="init()"/></h4> -->
+        <h4 class="title">
+          <span>Ongoing Games</span>
+          <span onclick="init()" title="Refresh lists">
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+              viewBox="0 0 489.645 489.645" xml:space="preserve">
+                <g>
+                  <path d="M460.656,132.911c-58.7-122.1-212.2-166.5-331.8-104.1c-9.4,5.2-13.5,16.6-8.3,27c5.2,9.4,16.6,13.5,27,8.3
+                    c99.9-52,227.4-14.9,276.7,86.3c65.4,134.3-19,236.7-87.4,274.6c-93.1,51.7-211.2,17.4-267.6-70.7l69.3,14.5
+                    c10.4,2.1,21.8-4.2,23.9-15.6c2.1-10.4-4.2-21.8-15.6-23.9l-122.8-25c-20.6-2-25,16.6-23.9,22.9l15.6,123.8
+                    c1,10.4,9.4,17.7,19.8,17.7c12.8,0,20.8-12.5,19.8-23.9l-6-50.5c57.4,70.8,170.3,131.2,307.4,68.2
+                    C414.856,432.511,548.256,314.811,460.656,132.911z"/>
+                </g>
+              </svg>
+            </span>
+        </h4>
+        <p class="small-note">Click on one to watch</p>
         <ul id="games-list"></ul>
       </div>
 
       <div>
-        <h4>Join a game or start a new one</h4>
-        <p> Enter your name <input type="text" id="name"> </p>
+        <h4 class="title">Join a game or start a new one</h4>
+        <p class="message"> Name required to start of join a game </p>
+        <p class="left-space"> <input type="text" id="name" placeholder="enter your name"> </p>
 
         <div>
           <h5>Awaiting Second Player</h5>
           <ul id="await-games-list"></ul>
-          <p><input type="button" value="Join" id="join" disabled onclick="joinGame()"/></p>
+          <p class="left-space"><input type="button" value="Join" id="join" disabled onclick="joinGame()"/></p>
         </div>
 
         <div>
           <h5>Create New Game</h5>
-          <p> 
+          <p class="left-space"> 
             <input type="radio" name="game" id="game-shogi" value="Shogi" checked>
             <label for="game-shogi">Shogi</label>
           </p>
-          <p> 
+          <p class="left-space"> 
             <input type="radio" name="game" id="game-go" value="Go"/> 
             <label for="game-go">Go</label>
           </p>
-          <p><input type="button" value="Start" id="start" disabled onclick="startGame()"/></p>
+          <p class="left-space"><input type="button" value="Create" id="start" disabled onclick="startGame()"/></p>
         </div>
 
       </div>
@@ -70,12 +115,7 @@
 
       function startGame() {
         if ( canStart ) {
-          console.log( 'create a new game')
-          console.log( 'name', name.value);
-          console.log( 'shogi', shogi.checked );
-          console.log( 'go', go.checked );
           const type = shogi.checked ? 'shogi' : 'go';
-          console.log( 'type', type )
           postRequest( '/games', {
             type,
             player: name.value
@@ -95,9 +135,6 @@
 
       function joinGame() {
         if ( canStart && canJoin ) {
-          console.log( 'join game')
-          console.log( 'name', name.value);
-          console.log( 'game id', gameIdToJoin )
           postRequest( `/games/${gameIdToJoin}`, {
             player: name.value
           })
@@ -130,9 +167,11 @@
           a.appendChild( li );
           gameList.appendChild( a );
         });
+        if ( started.length === 0 ) gameList.innerHTML = '<li>No ongoing games yet</li>';
 
         created.forEach( game => {
           const li = document.createElement( 'li' );
+          li.style.listStyle = 'none';
 
           const input = document.createElement( 'input' );
           input.type = 'radio';
@@ -144,15 +183,18 @@
             canJoin = true;
             join.disabled = !(canJoin && canStart);
           };
+          input.style.transform = 'translateY(2px)';
 
           const label = document.createElement( 'label' );
           label.for = `game-${game.id}`;
           label.innerText = `${game.game} played by ${game.player1} and ...you ?`;
+          label.style.marginLeft = '6px';
 
           li.appendChild( input );
           li.appendChild( label );
           awaitList.appendChild( li );
         });
+        if ( created.length === 0 ) awaitList.innerHTML = '<li>No games awaiting second player yet</li>';
       };
 
       function clearLists() {
