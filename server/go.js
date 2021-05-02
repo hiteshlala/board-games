@@ -3,19 +3,14 @@ const { createRandomKey } = require( './utils' );
 class Go {
   constructor( player1 ) {
     this.id = createRandomKey();
-    this.type = 'shogi';
+    this.type = 'go';
     this.player1 = player1;
     this.player2 = '';
     this.pieces = [];
     this.lastUpated = Date.now();
     this.sockets = [];
-    this.init();
-  }
-
-  init() {
-    this.pieces = [
-      { owner: 'player2', x: 8, y: 2, id: `p2-P-8-2`, captured: false, name: 'B' },
-    ];
+    this.play1count = 180;
+    this.play2count = 181;
   }
 
   onSocketMessage = (m) => {
@@ -41,7 +36,9 @@ class Go {
 
   restart = () => {
     this.lastUpated = Date.now();
-    this.init();
+    this.pieces = [];
+    this.play1count = 180;
+    this.play2count = 181;
   }
 
   get started() {
@@ -54,7 +51,9 @@ class Go {
       const data = {
         pieces: [...this.pieces ],
         name1: this.player1,
-        name2: this.player2
+        name2: this.player2,
+        play1count: this.play1count,
+        play2count: this.play2count
       };
       socket.send( JSON.stringify( data ) );
     }
@@ -62,13 +61,24 @@ class Go {
 
   move = ( data ) => {
     this.lastUpated = Date.now();
-    const { captureId, player, moved } = data;
-    if ( captureId ) {
-      const cappiece = this.pieces.find( i => i.id === captureId );
+    const { capturePiece, player, moved, newPiece } = data;
+    if ( capturePiece ) {
+      const cappiece = this.pieces.find( i => i.id === capturePiece.id );
       cappiece.x = -1;
       cappiece.y = -1;
       cappiece.owner = player;
       cappiece.captured = true;
+    }
+
+    // must be before 'moved'
+    if ( newPiece ) {
+      this.pieces.push( newPiece );
+      if ( newPiece.owner === 'player1' ) {
+        this.play1count -= 1;
+      }
+      else {
+        this.play2count -= 1;
+      }
     }
 
     if ( moved ) {
@@ -95,7 +105,9 @@ class Go {
         const data = {
           pieces: [...this.pieces ],
           name1: this.player1,
-          name2: this.player2
+          name2: this.player2,
+          play1count: this.play1count,
+          play2count: this.play2count
         };
         socket.send( JSON.stringify( data ) );
       }

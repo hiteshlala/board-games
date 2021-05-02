@@ -2,120 +2,529 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="icon.png" />
-    <link rel="stylesheet" href="normalize.css"/>
+    <link rel="icon" href="/icon.png" />
+    <link rel="stylesheet" href="/normalize.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Shogi or Go</title>
+    <style>
+      .go-board {
+        border: 2px solid brown;
+        width: fit-content;
+        background-color: burlywood;
+      }
+      .go-row {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+      }
+      .go-row div {
+        width: 32px;
+        height: 32px;
+        flex-grow: 0;
+        flex-shrink: 0;
+      }
+      .go-piece {
+        width: 28px !important;
+        height: 28px !important;
+        /* background: no-repeat center /80% url('shogipiece.png'); */
+        border-radius: 50%;
+        margin: auto;
+      }
+      .upsidedown {
+        transform: rotate(180deg);
+      }
+      .black {
+        background: black;
+      }
+      .white {
+        background: ivory;
+      }
+
+      .teal {
+        color:teal
+      }
+      .violet {
+        color:violet
+      }
+      .hide {
+        display: none !important;
+      }
+      #chats {
+        width: 100%;
+        height: 60px;
+        overflow-y: scroll;
+        border-bottom: 1px solid orangered;
+      }
+      #chats p {
+        padding: 3px;
+        margin: 0px;
+        font-size: 10px;
+      }
+      textarea {
+        resize: none;
+        width: 486px;
+        border: none;
+        border-color: transparent;
+        padding: 0px;
+        margin: 0px 5px;
+        box-sizing: border-box;
+        outline:none;
+      }
+      textarea:focus{
+        outline: none;
+      }
+      .chatarea {
+        background:seashell;
+        border-radius: 3px;
+        border: 2px solid orangered;
+      }
+      .warn {
+        padding: 0px;
+        margin: 0px;
+        margin-top: 5px;
+        font-size: 10px;
+        color: red;
+      }
+
+      .edge-bottom {
+        background: no-repeat center url('/go-edge-bottom.png');
+      }
+      .edge-top {
+        background: no-repeat center url('/go-edge-top.png');
+      }
+      .edge-left {
+        background: no-repeat center url('/go-edge-left.png');
+      }
+      .edge-right {
+        background: no-repeat center url('/go-edge-right.png');
+      }
+      .top-left {
+        background: no-repeat center url('/go-top-left.png');
+      }
+      .top-right {
+        background: no-repeat center url('/go-top-right.png');
+      }
+      .bottom-right {
+        background: no-repeat center url('/go-bottom-right.png');
+      }
+      .bottom-left {
+        background: no-repeat center url('/go-bottom-left.png');
+      }
+      .cross {
+        background: no-repeat center url('/go-cross.png');
+      }
+      .bowl {
+        height: 34px;
+        line-height: 34px;
+        display: flex;
+        width: 100%;
+      }
+      .bowl div {
+        margin: 0px 4px;
+      }
+      .spacer {
+        flex-grow: 1
+      }
+      .content {
+        width: 612px;
+      }
+      .capt-box {
+        font-size: 10px;
+        border: 1px solid orangered;
+        border-radius: 3px;
+        line-height: 32px;
+        margin-top: 2px !important;
+        margin-bottom: 2px !important;
+        padding: 0px 2px;
+      }
+      .rowlist {
+        display: flex;
+        line-height: 28px;
+        height: 28px;
+      }
+      .rowlist div {
+        margin: 0px 4px;
+      }
+
+
+    </style>
   </head>
   <body>
-    <h1>Shogi or Go</h1>
-    <div>
-      <h4>Ongoing Games</h4>
-      <ul id="games-list"></ul>
-    </div>
-
-    <div>
-      <h4>Join a game or start a new one</h4>
-      <p> Enter your name <input type="text" id="name"> </p>
+    <header onclick="window.location.assign('/')">
+      <img src="/icon.png">
+      <img src="/go-icon.png">
+      <p> Shogi or Go</p>
+      <img src="/go-icon.png">
+      <img src="/icon.png">
+    </header>
+    <div class="content">
 
       <div>
-        <h5>Awaiting Second Player</h5>
-        <ul id="await-games-list"></ul>
-        <p><input type="button" value="Join" id="join" disabled onclick="joinGame()"/></p>
+        <h4>
+          <span>Go game between</span>
+          <span id="p1"></span>
+          <span>and</span>
+          <span id="p2"></span>
+        </ol>
+      </div>
+
+      <div id="bowl-stone" class="bowl">
+        <div>MyTokens</div>
+        <div id="stones"></div>
+        <div id="stone-count"></div>
+        <div class="spacer"></div>
+        <div id="capture-box" class="capt-box">Drop here to capture</div>
+      </div>
+    
+      <div class="go-board" id="board"></div>
+
+      <div>
+        <p>
+          <a href="https://en.wikipedia.org/wiki/Go_(game)" target="_blank" rel="noreferrer noopener">
+            Click here for game play rules.
+          </a>
+        </p>
       </div>
 
       <div>
-        <h5>Create New Game</h5>
-        <p> 
-          <input type="radio" name="game" id="game-shogi" value="Shogi" checked>
-          <label for="game-shogi">Shogi</label>
-        </p>
-        <p> 
-          <input type="radio" name="game" id="game-go" value="Go"/> 
-          <label for="game-go">Go</label>
-        </p>
-        <p><input type="button" value="Start" id="start" disabled onclick="startGame()"/></p>
+        <h4><span id="p1capname"></span> Captures</h4>
+        <div id="player1Captures" class="rowlist"></div>
+      </div>
+
+      <div>
+        <h4><span id="p2capname"></span> Captures</h4>
+        <div id="player2Captures" class="rowlist"></div>
+      </div>
+
+      <p class="warn">* Be warned, chats are visible to everyone!</p>
+      <div class="chatarea">
+        <div id="chats"></div>
+        <textarea id="chatin"></textarea>
       </div>
 
     </div>
-
-    <script src="req.js"></script>
 
     <script>
-      const gameList = document.getElementById( 'games-list' );
-      const awaitList = document.getElementById( 'await-games-list' );
-      const shogi = document.getElementById( 'game-shogi' );
-      const go = document.getElementById( 'game-go' );
-      const start = document.getElementById( 'start' );
-      const name = document.getElementById( 'name' );
-      const join = document.getElementById( 'join' );
+      const p1cap = document.getElementById( 'player1Captures' );
+      const p2cap = document.getElementById( 'player2Captures' );
+      const name1 = document.getElementById( 'p1' );
+      const name2 = document.getElementById( 'p2' );
+      const name1cap = document.getElementById( 'p1capname' );
+      const name2cap = document.getElementById( 'p2capname' );
+      const chats = document.getElementById( 'chats' );
+      const chatinput = document.getElementById( 'chatin' );
+      const board = document.getElementById( 'board' );
+      const rows = [];
+      const stones = document.getElementById( 'stones' );
+      const count = document.getElementById( 'stone-count' );
+      const bowl = document.getElementById( 'bowl-stone' );
+      const captureBox = document.getElementById( 'capture-box' );
 
-      let canStart = false;
-      let canJoin = false;
-      let gameIdToJoin = '';
+      captureBox.ondragover = (ev) => {
+        ev.preventDefault();
+        captureBox.style.backgroundColor = 'green';
+      };
+      captureBox.ondragleave = (ev) => {
+        ev.preventDefault();
+        captureBox.style.backgroundColor = 'transparent';
+      };
+      captureBox.ondrop = (ev) => {
+        ev.preventDefault();
+        const data = {
+          player,
+        };
+        
+        const id = ev.dataTransfer.getData( 'text/plain' );
+        const movedData = pieces.find( i => i.id === id );
+        movedData.x = -1;
+        movedData.y = -1;
+        movedData.captured = true;
+        movedData.owner = player;
+        data.capturePiece = movedData;
 
-      name.oninput  = function() { 
-        canStart = name.value.length > 0;
-        canStart ? (start.disabled = false) : (start.disabled = true);
-        gameIdToJoin ? (join.disabled = !canStart) : (join.disabled = true );
+        captureBox.style.backgroundColor = 'transparent';
+
+        sendMessage({ move: data });
+      };
+      
+      let mystones = 0;
+
+      function createBoard() {
+        for( let r = 0; r < 19; r++ ) {
+          const row = document.createElement( 'div' );
+          row.classList.add( 'go-row' );
+          const cols =   [];
+
+          for( let c = 0; c < 19; c++ ) {
+            const square = document.createElement( 'div' );
+            square.classList.add( 'go-square' );
+            if ( c=== 0 && r===0 ) {
+              square.classList.add( 'top-left' );
+            }
+            else if ( c > 0 && c < 18 && r === 0 ) {
+              square.classList.add( 'edge-top' );
+            }
+            else if ( c === 18 && r === 0 ) {
+              square.classList.add( 'top-right' );
+            }
+            else if ( c === 0 && r > 0 && r < 18 ) {
+              square.classList.add( 'edge-left' );
+            }
+            else if ( c === 18 && r > 0 && r < 18 ) {
+              square.classList.add( 'edge-right' );
+            }
+            else if ( c > 0 && c < 18 && r === 18 ) {
+              square.classList.add( 'edge-bottom' );
+            }
+            else if ( c === 18 && r === 18 ) {
+              square.classList.add( 'bottom-right' );
+            }
+            else if ( c === 0 && r === 18 ) {
+              square.classList.add( 'bottom-left' );
+            }
+            else {
+              square.classList.add( 'cross' );
+            }
+
+            square.dataset.y = r;
+            square.dataset.x = c;
+
+            square.ondragover = (ev) => {
+              ev.preventDefault();
+              square.style.backgroundColor = 'green';
+            };
+            square.ondragleave = (ev) => {
+              ev.preventDefault();
+              square.style.backgroundColor = 'burlywood';
+            };
+            square.ondrop = (ev) => {
+              ev.preventDefault();
+              const data = {
+                player,
+              };
+              
+              const id = ev.dataTransfer.getData( 'text/plain' );
+              const movedData = pieces.find( i => i.id === id );
+              movedData.x = parseInt( square.dataset.x );
+              movedData.y = parseInt( square.dataset.y );
+              movedData.captured = false;
+              movedData.isNew && ( data.newPiece = movedData );
+              data.moved = movedData;
+              delete movedData.isNew;
+
+              square.style.backgroundColor = 'burlywood';
+
+              sendMessage({ move: data });
+            };
+            row.appendChild( square );
+            cols.push( square );
+          }
+          board.appendChild( row );
+          rows.push( cols );
+        }
+      }
+      createBoard();
+
+      let player = '';
+      let gameid = '';
+      let samegame = false;
+      let isplaying = false;
+      let socket;
+      let pieces = []
+
+      chatinput.addEventListener( 'keydown', sendChat );
+
+      function sendChat( ev ) {
+        if ( ev.keyCode === 13 ) { // enter key
+          ev.preventDefault();
+          ev.stopPropagation();
+          const text = chatinput.value;
+          sendMessage({ chat: { player, text }})
+          chatinput.value = '';
+          chatinput.selectionStart = 0;
+        }
+      }
+      
+
+      function createPiece( p, img ) {
+        const div = document.createElement( 'div' );
+        div.id = p.id;
+        div.classList.add( 'go-piece' );
+        div.classList.add( p.color );
+        if ( !img ) {
+          div.draggable = isplaying;
+          div.addEventListener( 'dragstart', (ev) => {
+            ev.dataTransfer.setData( 'text/plain', p.id );
+            ev.dataTransfer.dropEffect = 'move';
+          });
+          p.isNew && pieces.push( p );
+        }
+        return div;
+      };
+      const capBlack = createPiece({id: Math.random(), color: 'black'}, true);
+      const capWhite = createPiece({id: Math.random(), color: 'ivory'}, true);
+      capWhite.style.border = '1px solid black';
+
+      function redraw( ) {
+        clearBoard();
+
+        let play1count = 0;
+        let play2count = 0;
+
+        pieces.forEach( p => {
+          const div = createPiece( p );
+          if ( !p.captured ) {
+            const mom = rows[ p.y ][ p.x ];
+            mom.appendChild( div );
+          }
+          else {
+            if ( p.owner === 'player1') {
+              play1count += 1;
+            }
+            else {
+              play2count += 1;
+            }
+          }
+        });
+
+        const p1counter = document.createElement( 'div' );
+        p1counter.innerText = play1count;
+        p1cap.appendChild( capBlack );
+        p1cap.appendChild( p1counter );
+        const p2counter = document.createElement( 'div' );
+        p2counter.innerText = play2count;
+        p2cap.appendChild( capWhite );
+        p2cap.appendChild( p2counter );
+
+        const flipboard = isplaying && (player === 'player2');
+        flipboard && board.classList.add( 'upsidedown');
+      }
+
+      
+      window.onload = () => {
+        const cookies = {}
+        document.cookie.split(';').map( c => {
+          const [key, val] = c.split('=');
+          if ( /shogi-or-go-id/.test( key ) ) {
+            cookies.gameid = val;
+          }
+          else if ( /shogi-or-go-is-player/.test( key ) ) {
+            cookies.player = val;
+          }
+        });
+        const ingame = window.location.pathname.split('/')[2];
+        samegame = ingame === cookies.gameid;
+        isplaying = samegame && cookies.player;
+        if ( isplaying ) {
+          player = cookies.player;
+        }
+        console.log( 'gameid', ingame, samegame ? 'playing':  'watching' );
+        if ( !isplaying ) {
+          chatinput.classList.add( 'hide' );
+          bowl.classList.add( 'hide' );
+        }
+
+        const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsPort = window.location.port ? `:${window.location.port}` : '';
+        const wsUrl = `${wsProto}://${window.location.hostname}${wsPort}/websocket/${ingame}`;
+        socket = new WebSocket( wsUrl );
+        socket.addEventListener('open', (ev) => {
+          console.log('WebSocket open event:', ev);
+        });
+        socket.addEventListener('message', socketMessage);
+        socket.addEventListener('error', genericError);
+
+        redraw();
       };
 
-      function startGame() {
-        if ( canStart ) {
-          console.log( 'create a new game')
-          console.log( 'name', name.value);
-          console.log( 'shogi', shogi.checked );
-          console.log( 'go', go.checked );
-          
+      function socketMessage( m ) {
+        const msg = JSON.parse(m.data);
+        if ( msg.pieces ) {
+          pieces = msg.pieces;
+          redraw();
+        }
+        if ( msg.name1 ) {
+          name1.innerText = msg.name1;
+          name1cap.innerText = msg.name1;
+        }
+        if ( msg.name2 ) {
+          name2.innerText = msg.name2;
+          name2cap.innerText = msg.name2;
+        }
+        if ( msg.message ) {
+          alert( msg.message );
+        }
+        if ( msg.chat ) {
+          const p = document.createElement( 'p' );
+          p.innerText = msg.chat.text;
+          p.classList.add( msg.chat.player === 'player1' ? 'violet': 'teal' );
+          chats.appendChild( p );
+          p.scrollIntoView();
+        }
+        if ( msg.play1count && player === 'player1' ) {
+          mystones = msg.play1count;
+          count.innerText = mystones;
+          const div = createPiece({ 
+            owner: 'player1', 
+            x: -1, y: -1, 
+            id: `${Math.random()}`, 
+            captured: false, 
+            color: 'white', 
+            origOwner: 'player1',
+            isNew: true 
+          });
+          div.style.border = '1px solid black';
+          stones.innerText = '';
+          stones.appendChild( div );
+        }
+        if ( msg.play2count && player === 'player2' ) {
+          mystones = msg.play2count;
+          count.innerText = mystones;
+          const div = createPiece({ 
+            owner: 'player2', 
+            x: -1, y: -1, 
+            id: `${Math.random()}`, 
+            captured: false, 
+            color: 'black', 
+            origOwner: 'player2',
+            isNew: true 
+          });
+          div.style.border = '1px solid ivory';
+          stones.innerText = '';
+          stones.appendChild( div );
         }
       }
 
-      function joinGame() {
-        if ( canStart && canJoin ) {
-          console.log( 'join game')
-          console.log( 'name', name.value);
-          console.log( 'game id', gameIdToJoin )
+      function genericError( e ) {
+        if ( e.isTrusted ) {
+          console.log( e );
+          alert( e );
+        }
+        else {
+          console.log( e.message || e );
+          alert( e.message || e );
         }
       }
 
-
-      window.onload = async function() {
-        const {started, created } = await getRequest( '/games' );
-        started.forEach( game => {
-          const a = document.createElement( 'a' );
-          a.href = `/games/${game.id}`;
-
-          const li = document.createElement( 'li' );
-          li.innerText = `${game.game} played by ${game.name1} and ${game.name2}`;
-          li.id = game.id;
-
-          a.appendChild( li );
-          gameList.appendChild( a );
+      function clearBoard() {
+        rows.forEach( cols => {
+          cols.forEach( square => {
+            square.innerText = "";
+          });
         });
+        p1cap.innerText = '';
+        p2cap.innerText = '';
+      }
 
-        created.forEach( game => {
-          const li = document.createElement( 'li' );
-
-          const input = document.createElement( 'input' );
-          input.type = 'radio';
-          input.name = 'await-game';
-          input.id = `game-${game.id}`;
-          input.value = game.id;
-          input.onclick = function () { 
-            gameIdToJoin = game.id;
-            canJoin = true;
-            join.disabled = !(canJoin && canStart);
-          };
-
-          const label = document.createElement( 'label' );
-          label.for = `game-${game.id}`;
-          label.innerText = `${game.game} played by ${game.name1} and ...you ?`;
-
-          li.appendChild( input );
-          li.appendChild( label );
-          awaitList.appendChild( li );
-        });
-      };
+      function sendMessage( data ) {
+        const msg = JSON.stringify( data );
+        if ( socket && socket.readyState === socket.OPEN) { 
+          socket.send( msg );
+        }
+        else {
+          alert( 'Failed - Socket Closed' );
+        }
+      }
 
     </script>
   </body>

@@ -9,9 +9,11 @@
   </head>
   <body>
     <header>
-      <img src="icon.png">
+      <img src="/icon.png">
+      <img src="/go-icon.png">
       <p> Shogi or Go</p>
-      <img src="icon.png">
+      <img src="/go-icon.png">
+      <img src="/icon.png">
     </header>
     <div class="content">
       <div>
@@ -73,6 +75,7 @@
           console.log( 'shogi', shogi.checked );
           console.log( 'go', go.checked );
           const type = shogi.checked ? 'shogi' : 'go';
+          console.log( 'type', type )
           postRequest( '/games', {
             type,
             player: name.value

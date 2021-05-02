@@ -24,10 +24,6 @@
         flex-grow: 0;
         flex-shrink: 0;
       }
-      canvas {
-        border: 1px solid black;
-        background-color: burlywood;
-      }
       .shogi-piece {
         width: 52px;
         height: 52px;
@@ -92,14 +88,14 @@
         font-size: 10px;
         color: red;
       }
-
-
     </style>
   </head>
   <body>
     <header onclick="window.location.assign('/')">
       <img src="/icon.png">
+      <img src="/go-icon.png">
       <p> Shogi or Go</p>
+      <img src="/go-icon.png">
       <img src="/icon.png">
     </header>
     <div class="content">
@@ -238,7 +234,7 @@
         <p><input type="checkbox" value="japanese" onchange="language()" /> Japanese Pieces</p>
       </div>
 
-      <p class="warn">* Be warned chats are visible to everyone!</p>
+      <p class="warn">* Be warned, chats are visible to everyone!</p>
       <div class="chatarea">
         <div id="chats"></div>
         <textarea id="chatin"></textarea>
@@ -429,7 +425,6 @@
         const msg = JSON.parse(m.data);
         if ( msg.pieces ) {
           pieces = msg.pieces;
-          shouldRedraw = true;
           redraw();
         }
         if ( msg.name1 ) {

@@ -359,13 +359,14 @@ body {
 
 header {
   height: 50px;
-  margin: 0px;
+  margin: 0px auto;
   padding: 0px;
   background-color: bisque;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: space-evenly;
+  width: 612px;
 }
 
 header img {

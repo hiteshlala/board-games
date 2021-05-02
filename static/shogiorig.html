@@ -219,6 +219,129 @@
     </script> 
     -->
 
+    <!-- 
+    <canvas width=32 height=32 id="canvas"></canvas>
+    <style>
+      canvas {
+        border: 1px solid black;
+        background-color: burlywood;
+      }
+    </style>
+    <script>
+      // used to create go piece background
+      const can = document.getElementById( 'canvas' );
+      const ctx = can.getContext( '2d' );
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'brown';
+      // /* cross
+      ctx.beginPath();
+      ctx.moveTo( 16, 0 );
+      ctx.lineTo( 16, 32 );
+      ctx.moveTo( 0, 16 );
+      ctx.lineTo( 32, 16 );
+      ctx.stroke();
+      */
+      /* left edge
+      ctx.beginPath();
+      ctx.moveTo( 16, 0 );
+      ctx.lineTo( 16, 32 );
+      ctx.moveTo( 16, 16 );
+      ctx.lineTo( 32, 16 );
+      ctx.stroke();
+      // */
+     /* right edge
+      ctx.beginPath();
+      ctx.moveTo( 16, 0 );
+      ctx.lineTo( 16, 32 );
+      ctx.moveTo( 16, 16 );
+      ctx.lineTo( 0, 16 );
+      ctx.stroke();
+      // */
+     /* top edge
+      ctx.beginPath();
+      ctx.moveTo( 16, 16);
+      ctx.lineTo( 16, 32 );
+      ctx.moveTo( 0, 16 );
+      ctx.lineTo( 32, 16 );
+      ctx.stroke();
+      // */
+     /* bottom edge
+      ctx.beginPath();
+      ctx.moveTo( 16, 0);
+      ctx.lineTo( 16, 16 );
+      ctx.moveTo( 0, 16 );
+      ctx.lineTo( 32, 16 );
+      ctx.stroke();
+      // */
+     /* top left
+      ctx.beginPath();
+      ctx.moveTo( 32, 16  );
+      ctx.lineTo( 16, 16 );
+      ctx.lineTo( 16, 32 );
+      ctx.stroke();
+      // */
+     /* top right
+      ctx.beginPath();
+      ctx.moveTo( 0, 16  );
+      ctx.lineTo( 16, 16 );
+      ctx.lineTo( 16, 32 );
+      ctx.stroke();
+      // */
+     /* bottom right
+      ctx.beginPath();
+      ctx.moveTo( 16, 0  );
+      ctx.lineTo( 16, 16 );
+      ctx.lineTo( 0, 16 );
+      ctx.stroke();
+      // */
+     /* bottom left
+      ctx.beginPath();
+      ctx.moveTo( 16, 0  );
+      ctx.lineTo( 16, 16 );
+      ctx.lineTo( 32, 16 );
+      ctx.stroke();
+      // */
+    </script> 
+    -->
+
+    <!--
+      <canvas width=32 height=32 id="canvas"></canvas>
+    <style>
+      canvas {
+        border: 1px solid black;
+        background-color: bisque;
+      }
+    </style>
+    <script>
+      const can = document.getElementById( 'canvas' );
+      const ctx = can.getContext( '2d' );
+      
+      ctx.lineWidth = 1;
+      ctx.fillStyle = 'ivory';
+      ctx.beginPath();
+      ctx.arc( 8, 8, 6, 0, 2*Math.PI);
+      ctx.stroke();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc( 24, 24, 6, 0, 2*Math.PI);
+      ctx.stroke();
+      ctx.fill();
+
+      ctx.fillStyle = 'black';
+      ctx.beginPath();
+      ctx.arc( 8, 24, 6, 0, 2*Math.PI);
+      ctx.stroke();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc( 24, 8, 6, 0, 2*Math.PI);
+      ctx.stroke();
+      ctx.fill();
+
+      
+    </script>
+    -->
+
     <script>
       const p1cap = document.getElementById( 'player1Captures' );
       const p2cap = document.getElementById( 'player2Captures' );

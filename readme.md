@@ -19,7 +19,8 @@ Deployed: [Shogi or Go](http://hiteshlala.biz:6543)
   
 ## TODO
 - [x] Implement Shogi
-- [ ] Implement Go
+- [x] Implement Go
+- [ ] Improve intuitiveness of landing page
  
   
   
