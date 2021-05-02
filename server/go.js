@@ -7,10 +7,10 @@ class Go {
     this.player1 = player1;
     this.player2 = '';
     this.pieces = [];
-    this.lastUpated = Date.now();
+    this.lastUpdated = Date.now();
     this.sockets = [];
-    this.play1count = 180;
-    this.play2count = 181;
+    this.play1count = 180; // white
+    this.play2count = 181; // black
   }
 
   onSocketMessage = (m) => {
@@ -35,7 +35,7 @@ class Go {
   }
 
   restart = () => {
-    this.lastUpated = Date.now();
+    this.lastUpdated = Date.now();
     this.pieces = [];
     this.play1count = 180;
     this.play2count = 181;
@@ -46,7 +46,7 @@ class Go {
   }
 
   initPlayer = ( socket ) => {
-    this.lastUpated = Date.now();
+    this.lastUpdated = Date.now();
     if ( socket && socket.readyState === socket.OPEN) {
       const data = {
         pieces: [...this.pieces ],
@@ -60,7 +60,7 @@ class Go {
   }
 
   move = ( data ) => {
-    this.lastUpated = Date.now();
+    this.lastUpdated = Date.now();
     const { capturePiece, player, moved, newPiece } = data;
     if ( capturePiece ) {
       const cappiece = this.pieces.find( i => i.id === capturePiece.id );
@@ -114,11 +114,6 @@ class Go {
     });
   }
 
-  
-
-
-
-  
 }
 
 module.exports = Go;

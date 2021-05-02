@@ -55,7 +55,7 @@ function websocketCreator(server) {
 
   websoc.on('connection', (socket, websocket) => {
     const { gamePlayer, gamePlaying, gameId } = websocket;
-    console.log('Socket connect Game id =', gameId, 'Game player =', gamePlayer, 'In game', gamePlaying );
+    console.log(`Socket connect Game id=${gameId} player=${gamePlayer} gamePlaying=${gamePlaying}` );
 
     const game = gamesDb.getGame(gameId);
     if (game) {

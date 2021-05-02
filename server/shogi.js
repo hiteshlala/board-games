@@ -7,13 +7,13 @@ class Shogi {
     this.player1 = player1;
     this.player2 = '';
     this.pieces = [];
-    this.lastUpated = Date.now();
+    this.lastUpdated = Date.now();
     this.sockets = [];
     this.init();
   }
 
   init() {
-    this.pieces = [
+    const initialData = [
       { owner: 'player1', x: 0, y: 8, promoted: false, id: `p1-L-0-8`, captured: false, name: 'L', size: 'medium' },
       { owner: 'player1', x: 1, y: 8, promoted: false, id: `p1-N-1-8`, captured: false, name: 'N', size: 'medium' },
       { owner: 'player1', x: 2, y: 8, promoted: false, id: `p1-S-2-8`, captured: false, name: 'S', size: 'medium' },
@@ -56,6 +56,7 @@ class Shogi {
       { owner: 'player2', x: 7, y: 2, promoted: false, id: `p2-P-7-2`, captured: false, name: 'P', size: 'small' },
       { owner: 'player2', x: 8, y: 2, promoted: false, id: `p2-P-8-2`, captured: false, name: 'P', size: 'small' },
     ];
+    this.pieces = [ ...initialData ];
   }
 
   onSocketMessage = (m) => {
@@ -80,7 +81,7 @@ class Shogi {
   }
 
   restart = () => {
-    this.lastUpated = Date.now();
+    this.lastUpdated = Date.now();
     this.init();
   }
 
@@ -89,7 +90,7 @@ class Shogi {
   }
 
   initPlayer = ( socket ) => {
-    this.lastUpated = Date.now();
+    this.lastUpdated = Date.now();
     if ( socket && socket.readyState === socket.OPEN) {
       const data = {
         pieces: [...this.pieces ],
@@ -101,7 +102,7 @@ class Shogi {
   }
 
   move = ( data ) => {
-    this.lastUpated = Date.now();
+    this.lastUpdated = Date.now();
     const { captureId, player, moved } = data;
     if ( captureId ) {
       const cappiece = this.pieces.find( i => i.id === captureId );
@@ -143,11 +144,6 @@ class Shogi {
       }
     });
   }
-
-  
-
-
-
   
 }
 

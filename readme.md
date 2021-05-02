@@ -4,18 +4,15 @@ A simple implementation of socket based Shogi and Go boards.
 
 Deployed: [Shogi or Go](http://hiteshlala.biz:6543)
 
-* No rules implemented
+* No game rules implemented - these are player enforced
 * Users can join a game 2 person
 * Users can move any pieces
 
 ## Interactions
 * User visits home page
-* Has list of ongoing games
-* Users can watch ongoing game
-* Has list of open games
-* One user awaiting someone to join and play
-* Can create a game
-* Start a new game 
+* Has list of ongoing games and can watch play
+* Has list of games awaiting someone to join and play
+* User can create a game
   
 ## TODO
 - [x] Implement Shogi

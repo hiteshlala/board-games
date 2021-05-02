@@ -3,12 +3,13 @@ const Shogi = require('./shogi');
 const Go = require( './go' );
 
 const gameTooOld = (durations.minute * 45);
-const maxGames = 50;
+const maxGames = 20;
+const cleanUpTime = durations.hour;
 
 class GameDB {
   constructor() {
     this.games = {};
-    this.timer = setInterval(() => this.launchCleanupTimer(), durations.hour);
+    this.timer = setInterval(() => this.launchCleanupTimer(), cleanUpTime);
   }
 
   getGame(id) {
@@ -37,8 +38,8 @@ class GameDB {
   }
 
   launchCleanupTimer() {
-    console.log('Game Idle Cleanup');
     const games = Object.values(this.games);
+    console.log(`Game Idle Cleanup - checking ${games.length} games`);
     games.forEach(game => {
       const isStale = (Date.now() - game.lastUpdated) > gameTooOld;
       if (isStale) {
