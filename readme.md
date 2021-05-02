@@ -20,7 +20,7 @@ Deployed: [Shogi or Go](http://hiteshlala.biz:6543)
 ## TODO
 - [x] Implement Shogi
 - [x] Implement Go
-- [ ] Improve intuitiveness of landing page
+- [x] Improve intuitiveness of landing page
  
   
   
