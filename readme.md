@@ -20,6 +20,3 @@ Deployed: [Shogi or Go](http://hiteshlala.biz:6543)
 - [x] Improve intuitiveness of landing page
  
   
-  
-
-
