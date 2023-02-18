@@ -4,6 +4,9 @@ class Shogi {
   constructor( player1 ) {
     this.id = createRandomKey();
     this.type = 'shogi';
+    this.minPlayers = 2;
+    this.maxPlayers = 2;
+    this.players = [player1]
     this.player1 = player1;
     this.player2 = '';
     this.pieces = [];

@@ -1,5 +1,5 @@
 const Koa = require('koa');
-const bodyparse = require('koa-body');
+const { koaBody } = require('koa-body');
 const assets = require('koa-static');
 const path = require('path');
 
@@ -16,7 +16,7 @@ function createServer() {
     console.log(`Server Error: ${err}`);
     ctx.body = err;
   });
-  app.use(bodyparse());
+  app.use(koaBody());
   app.use(assets(staticAssets));
   app.use(home.routes());
   app.use(home.allowedMethods());

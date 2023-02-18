@@ -1,6 +1,7 @@
 const { durations } = require('./utils');
 const Shogi = require('./shogi');
 const Go = require( './go' );
+const Avalon = require('./avalon');
 
 const gameTooOld = (durations.minute * 45);
 const maxGames = 20;
@@ -28,6 +29,9 @@ class GameDB {
         break;
       case 'go':
         newgame = new Go(player1);
+        break;
+      case 'avalon':
+        newgame = new Avalon(player1);
         break;
     }
     if (newgame) {

@@ -17,6 +17,7 @@ const durations = {
 const gameIdCookieName = 'shogi-or-go-id';
 const gamePlayerCookieName = 'shogi-or-go-is-player';
 const sessionlength = durations.day;
+const gameTypes = ['shogi', 'go', 'avalon'];
 
 function createSessionCookieSetttings() {
   return {
@@ -35,5 +36,6 @@ module.exports = {
   durations,
   gameIdCookieName,
   gamePlayerCookieName,
-  createSessionCookieSetttings
+  createSessionCookieSetttings,
+  gameTypes
 };

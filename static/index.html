@@ -41,11 +41,13 @@
   </head>
   <body>
     <header>
-      <img src="/icon.png">
-      <img src="/go-icon.png">
-      <p> Shogi or Go</p>
-      <img src="/go-icon.png">
-      <img src="/icon.png">
+      <div class="header">
+        <img src="/icon.png">
+        <img src="/go-icon.png">
+        <p> Shogi or Go</p>
+        <img src="/go-icon.png">
+        <img src="/icon.png">
+      </div>
     </header>
     <div class="content">
       <div>
@@ -83,12 +85,16 @@
         <div>
           <h5>Create New Game</h5>
           <p class="left-space"> 
-            <input type="radio" name="game" id="game-shogi" value="Shogi" checked>
+            <input type="radio" name="game" id="game-shogi" value="shogi" checked>
             <label for="game-shogi">Shogi</label>
           </p>
           <p class="left-space"> 
-            <input type="radio" name="game" id="game-go" value="Go"/> 
+            <input type="radio" name="game" id="game-go" value="so"/> 
             <label for="game-go">Go</label>
+          </p>
+          <p class="left-space"> 
+            <input type="radio" name="game" id="game-avalon" value="avalon"/> 
+            <label for="game-avalon">Avalon</label>
           </p>
           <p class="left-space"><input type="button" value="Create" id="start" disabled onclick="startGame()"/></p>
         </div>
@@ -103,6 +109,7 @@
       const awaitList = document.getElementById( 'await-games-list' );
       const shogi = document.getElementById( 'game-shogi' );
       const go = document.getElementById( 'game-go' );
+      const avalon = document.getElementById( 'game-avalon' );
       const start = document.getElementById( 'start' );
       const name = document.getElementById( 'name' );
       const join = document.getElementById( 'join' );
@@ -117,9 +124,16 @@
         gameIdToJoin ? (join.disabled = !canStart) : (join.disabled = true );
       };
 
+      function getType() {
+        return [shogi, go, avalon].reduce((prev, curr) => {
+          return curr.checked ? curr.value : prev;
+        }, '');
+      }
+
       function startGame() {
         if ( canStart ) {
-          const type = shogi.checked ? 'shogi' : 'go';
+          const type = getType();
+          console.log('type', type)
           postRequest( '/games', {
             type,
             player: name.value

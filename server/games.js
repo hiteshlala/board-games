@@ -3,7 +3,12 @@ const fs = require( 'fs' );
 const path = require( 'path' );
 
 const gameDb = require( './gamedb' );
-const { createSessionCookieSetttings, gameIdCookieName, gamePlayerCookieName } = require( './utils' );
+const { 
+  createSessionCookieSetttings, 
+  gameIdCookieName, 
+  gamePlayerCookieName,
+  gameTypes
+} = require( './utils' );
 
  
 const games = new Router();
@@ -21,7 +26,8 @@ games.get( '/games', ctx => {
 games.post( '/games', ctx => {
   console.log( `${ctx.method} - ${ctx.host} - ${ctx.path}` );
   const { type, player } = ctx.request.body;
-  const canNotCreateGame = (type !== 'go' && type !== 'shogi') || ( !player || player.length === 0 );
+  const notValidType = !gameTypes.includes(type);
+  const canNotCreateGame = notValidType|| ( !player || player.length === 0 );
   if ( canNotCreateGame ) {
     ctx.body = {
       message: 'Game type and player name required.'
@@ -36,7 +42,12 @@ games.post( '/games', ctx => {
     const gameid = gameDb.createGame( type, player );
     const cookie = createSessionCookieSetttings();
     ctx.cookies.set(gameIdCookieName, gameid, cookie);
-    ctx.cookies.set(gamePlayerCookieName, 'player1', cookie);
+    if (type === 'avalon') {
+      ctx.cookies.set(gamePlayerCookieName, player, cookie);
+    }
+    else {
+      ctx.cookies.set(gamePlayerCookieName, 'player1', cookie);
+    }
     ctx.body = {
       gameid
     };
@@ -49,12 +60,20 @@ games.post( '/games/:id', ctx => {
   const { player } = ctx.request.body;
   const gameid = ctx.params.id;
   const game = gameDb.getGame( gameid );
-  const canJoinGame =  game && !game.started && player; 
-  if ( canJoinGame ) {
+  let canJoinGame =  game && !game.started && player;
+  let isSpaceToJoin = game.players.length < game.maxPlayers;
+  if ( canJoinGame && isSpaceToJoin ) {
     game.player2 = player;
+    game.players.push(player);
     const cookie = createSessionCookieSetttings();
     ctx.cookies.set(gameIdCookieName, gameid, cookie);
-    ctx.cookies.set(gamePlayerCookieName, 'player2', cookie);
+    if (game.type === 'avalon') {
+      ctx.cookies.set(gamePlayerCookieName, player, cookie);
+    }
+    else {
+      ctx.cookies.set(gamePlayerCookieName, 'player2', cookie);
+    }
+
     ctx.body = {
       gameid
     };

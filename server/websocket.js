@@ -56,11 +56,14 @@ function websocketCreator(server) {
   websoc.on('connection', (socket, websocket) => {
     const { gamePlayer, gamePlaying, gameId } = websocket;
     console.log(`Socket connect Game id=${gameId} player=${gamePlayer} gamePlaying=${gamePlaying}` );
-
+    socket.gamePlayer = gamePlayer;
+    socket.gameId = gameId;
     const game = gamesDb.getGame(gameId);
     if (game) {
       game.sockets.push( socket );
-      socket.on('message', game.onSocketMessage);
+      if (gamePlayer) {
+        socket.on('message', game.onSocketMessage);
+      }
       socket.on('close', game.onSocketClose);
       socket.on('error', game.onSocketError);
       game.initPlayer( socket );

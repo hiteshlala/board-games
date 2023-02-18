@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/icon.png" />
+    <link rel="stylesheet" href="/normalize.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Avalon</title>
+    <style>
+      .upsidedown {
+        transform: rotate(180deg);
+      }
+      .teal {
+        color:teal
+      }
+      .violet {
+        color:violet
+      }
+      .hide {
+        display: none !important;
+      }
+      .red-b {
+        background-color: red;
+      }
+      .gray-b {
+        background-color: gray;
+      }
+
+      #chats {
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        overflow-y: scroll;
+        border-bottom: 1px solid orangered;
+      }
+      #chats p {
+        padding: 3px;
+        margin: 0px;
+      }
+      textarea {
+        resize: none;
+        width: 98%;
+        border: none;
+        border-color: transparent;
+        padding: 3px;
+        margin: 2px;
+        box-sizing: border-box;
+        outline:none;
+      }
+      textarea:focus {
+        outline: none;
+      }
+      .chatarea {
+        background:seashell;
+        border-radius: 3px;
+        border: 2px solid orangered;
+        font-size: 12px;
+      }
+      .warn {
+        padding: 0px;
+        margin: 0px;
+        margin-top: 5px;
+        font-size: 10px;
+        color: red;
+        border-bottom: 1px solid orangered;
+      }
+
+      
+      .spacer {
+        flex-grow: 1
+      }
+
+      .content {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0px auto;
+        display: flex;
+        flex-direction: row;
+      }
+      .left-panel {
+        margin-top: 5px;
+        margin-left: 5px;
+        flex-grow: 1;
+      }
+      .right-panel {
+        margin-right: 5px;
+        min-width: 200px;
+        margin-top: 5px;
+      }
+
+      .waiting-room {
+        margin: 0px auto;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+      }
+      .waiting-player-box {
+        border: 1px solid burlywood;
+        margin-left: 10px;
+        padding: 3px;
+      }
+      .waiting-player-list {
+        min-height: 200px;
+        min-width: 150px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .waiting-player {
+        border: 1px solid burlywood;
+        margin: 4px;
+        padding: 4px;
+        min-width: 60px;
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+      }
+
+      .owner-actions {
+        border: 1px solid burlywood;
+        min-width: 150px;
+        padding: 3px;
+      }
+      .button-row {
+        text-align: center;
+      }
+
+      .player-statuses {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      .player-status {
+        width: 150px;
+        height: 150px;
+        border: 1px solid burlywood;
+        margin: 5px;
+        padding: 5px;
+      }
+      .action-bar {
+        width: 100%;
+        height: 100px;
+      }
+
+      .me {
+        border: 3px solid green !important;
+      }
+
+      .evil {
+        background-color: rgb(255, 165, 165);
+      }
+      
+    </style>
+  </head>
+  <body>
+    <header onclick="window.location.assign('/')">
+      <div class="header">
+        <img src="/icon.png">
+        <img src="/go-icon.png">
+        <p>Avalon</p>
+        <img src="/go-icon.png">
+        <img src="/icon.png">
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="left-panel">
+
+        <div class="waiting-room" id="waiting-room-side">
+          <div class="waiting-player-box">
+            <p><b>Players in waiting room:</b></p>
+            <div id="players-list" class="waiting-player-list"></div>
+          </div>
+
+          <div id="owner-actions" class="owner-actions hide">
+            <p><b>Options:</b></p>
+            <ol id="characters">
+              <li><input id="merlin" type="checkbox" checked> Merlin</input></li>
+              <li><input id="assassin" type="checkbox" checked> Assassin</input></li>
+              <li><input id="morgana" type="checkbox"> Morgana</input></li>
+              <li><input id="percival" type="checkbox"> Percival</input></li>
+            </ol>
+            <div class="button-row">
+              <button id="start-button" class="hide" onclick="startGame()" disabled>Start</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="active-game" class="hide">
+          <div id="player-statuses" class="player-statuses"></div>
+          <div id="action-bar" class="action-bar">
+            <button>Do shit</button>
+          </div>
+        </div>
+
+
+      </div>
+
+      <div class="right-panel">
+        <div class="chatarea">
+          <p class="warn">* Be warned, chats are visible to everyone!</p>
+          <div id="chats"></div>
+          <textarea id="chatin"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const playersList = document.getElementById( 'players-list' );
+      const chats = document.getElementById( 'chats' );
+      const chatinput = document.getElementById( 'chatin' );
+      const startButton = document.getElementById('start-button');
+      const ownerActions = document.getElementById('owner-actions');
+      const waitingView = document.getElementById('waiting-room-side');
+      const activeView = document.getElementById('active-game');
+      const playStatuses = document.getElementById('player-statuses');
+
+      let player = '';
+      let gameid = '';
+      let samegame = false;
+      let isplaying = false;
+      let socket;
+      let minPlayers = 1000;
+      let maxPlayers = -1;
+      let isOwner = false;
+      let started = false;
+    
+
+      chatinput.addEventListener( 'keydown', sendChat );
+
+      function sendChat( ev ) {
+        if ( ev.keyCode === 13 ) { // enter key
+          ev.preventDefault();
+          ev.stopPropagation();
+          const text = chatinput.value;
+          if (text.trim().length > 0) {
+            sendMessage({ chat: { player, text }})
+          }
+          chatinput.value = '';
+          chatinput.selectionStart = 0;
+        }
+      }
+
+      function redraw() {
+        console.log('%c should draw something', 'color:#fc03f0');
+      }
+
+      function startGame() {
+        const charactersToAdd = [];
+        ['merlin', 'assassin', 'morgana', 'percival'].forEach(ch => {
+          if (document.getElementById(ch).checked) {
+            charactersToAdd.push(ch);
+          }
+        });
+
+        console.log('%c start game', 'color:#fc03f0', charactersToAdd );
+        sendMessage({
+          startGame: {
+            player,
+            characters: charactersToAdd,
+          }
+        });
+      }
+      
+
+      window.onload = () => {
+        const cookies = {}
+        document.cookie.split(';').map( c => {
+          const [key, val] = c.split('=');
+          if ( /shogi-or-go-id/.test( key ) ) {
+            cookies.gameid = val;
+          }
+          else if ( /shogi-or-go-is-player/.test( key ) ) {
+            cookies.player = val;
+          }
+        });
+        const ingame = window.location.pathname.split('/')[2];
+        samegame = ingame === cookies.gameid;
+        isplaying = samegame && cookies.player;
+
+        // add an additional chack that player is playing THIS game
+
+        if ( isplaying ) {
+          player = cookies.player;
+        }
+        console.log( 'gameid', ingame, samegame ? 'playing':  'watching' );
+        if ( !isplaying ) {
+          chatinput.classList.add( 'hide' );
+        }
+
+        const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsPort = window.location.port ? `:${window.location.port}` : '';
+        const wsUrl = `${wsProto}://${window.location.hostname}${wsPort}/websocket/${ingame}`;
+        socket = new WebSocket( wsUrl );
+        socket.addEventListener('open', (ev) => {
+          console.log('WebSocket open event:', ev);
+        });
+        socket.addEventListener('message', socketMessage);
+        socket.addEventListener('error', genericError);
+
+        redraw();
+      };
+
+      function socketMessage( m ) {
+        const msg = JSON.parse(m.data);
+
+        if(msg.started) {
+          started = true;
+          waitingView.classList.add('hide');
+          activeView.classList.remove('hide');
+        }
+
+        if ( msg.minPlayers || msg.maxPlayers ) {
+          minPlayers = msg.minPlayers;
+          maxPlayers = msg.maxPlayers;
+        }
+
+        if (msg.impersonating) {
+          console.log(msg.impersonating);
+        }
+        
+
+        if ( msg.players) {
+          if (!started) {
+            const numPlayers = msg.players.length;
+            playersList.innerText = "";
+            for (let pl of msg.players) {
+              const p = document.createElement( 'p' );
+              p.innerText = pl;
+              p.classList.add('waiting-player');
+              playersList.append(p);
+            }
+            if (numPlayers >= minPlayers && numPlayers <= maxPlayers) {
+              startButton.disabled = false;
+            }
+          }
+          else {
+            const nominees = msg.nominees || [];
+            const evil = msg.extraInfo?.evil || [];
+            const roles = msg.extraInfo?.roles || [];
+            playStatuses.innerText = '';
+            for (let pl of msg.players) {
+              const isCurrentLeader = msg.turn === player;
+              const thisIsPlayer = pl === player;
+              const isEvil = evil.includes(pl);
+
+              const panel = document.createElement( 'div' );
+              panel.classList.add('player-status');
+              if (thisIsPlayer) {
+                panel.classList.add('me');
+              }
+              if (isEvil) {
+                console.log(pl, isEvil)
+                panel.classList.add('evil');  
+              }
+              
+
+              
+              const pName = document.createElement( 'div' )
+              const pRole = roles.filter(i => i.player === pl)[0];
+              if (thisIsPlayer) {
+                pName.innerText = `${pl} - ${msg.impersonating.character}`;  
+              }
+              else if ( pRole ) {
+                pName.innerText = `${pl} - ${pRole.character}`;  
+              }
+              else { 
+                pName.innerText = pl;
+              }
+              panel.append(pName);
+
+              const pTurn = document.createElement( 'div' )
+              pTurn.classList.add( isCurrentLeader && thisIsPlayer  ? 'red-b' : 'gray-b')
+              pTurn.innerText = 'Leader';
+              panel.append(pTurn)
+
+              const pSelect = document.createElement('div');
+              
+              if (isCurrentLeader) {
+                pSelect.innerHTML= `<input type="checkbox" oninput="nominate(this, '${pl}')" ${nominees.includes(pl) ? 'checked' : ''}> Nominate</input>`
+              }
+              else {
+                pSelect.innerHTML= `<input type="checkbox" ${nominees.includes(pl) ? 'checked' : ''} disabled> Nominated</input>`
+              }
+              panel.appendChild(pSelect);
+
+
+              
+
+
+              playStatuses.append(panel);
+            }
+          }
+        }
+
+        if (msg.owner === player) {
+          isOwner = true;
+          ownerActions.classList.remove('hide');
+          startButton.classList.remove('hide');
+        }
+
+
+        
+        if ( msg.message ) {
+          alert( msg.message );
+        }
+        if ( msg.chat ) {
+          const p = document.createElement( 'p' );
+          p.innerText = `${msg.chat.player}: ${msg.chat.text}`;
+          p.classList.add( msg.chat.player === player ? 'violet': 'teal' );
+          chats.appendChild( p );
+          p.scrollIntoView();
+        }
+        
+      }
+
+      function nominate(inpEl, person) {
+        console.log(`%c nominate: ${person} ${inpEl.checked}`, 'color:#fc03f0');
+        if(inpEl.checked) {
+          sendMessage({ nominate: person });
+        }
+        else {
+          sendMessage({ denominate: person });
+        }
+
+      }
+
+      function genericError( e ) {
+        if ( e.isTrusted ) {
+          console.log( e );
+          alert( e );
+        }
+        else {
+          console.log( e.message || e );
+          alert( e.message || e );
+        }
+      }
+
+      function sendMessage( data ) {
+        const msg = JSON.stringify( data );
+        if ( socket && socket.readyState === socket.OPEN) { 
+          socket.send( msg );
+        }
+        else {
+          alert( 'Failed - Socket Closed' );
+        }
+      }
+
+    </script>
+  </body>
+</html>
