@@ -31,9 +31,6 @@ good      3 4 4 5 6 6
 evil      2 2 3 3 3 4
 
 
-
-
-
 */
 
 const playersCount = {
@@ -75,12 +72,12 @@ class Avalon {
     this.questCanStart = false;
     this.questors = [];
     this.voteResult = '';
-
-
-    
-
-
-
+    this.questStarted = false;
+    this.questFails = 0;
+    this.questWins = 0;
+    this.questFailed = false;
+    this.canMoveToNextRound = false;
+    this.shouldRedoTeamVote = false;
 
   }
 
@@ -93,6 +90,9 @@ class Avalon {
     if ( msg.requestQuestVote ) this.requestQuestVote( msg.requestQuestVote );
     if ( msg.vote ) this.vote(msg.vote);
     if (msg.revealVotes) this.revealVotes(msg.revealVotes);
+    if (msg.startQuest) this.startQuest(msg.startQuest);
+    if (msg.startNextRound) this.startNextRound(msg.startNextRound);
+    if (msg.redoTeamVote) this.redoTeamVote(msg.redoTeamVote);
   }
   onSocketClose = (e) => {
     console.log( 'socket close', e.message || e);
@@ -108,12 +108,6 @@ class Avalon {
         socket = undefined;
       }
     });
-  }
-
-  restart = () => {
-    this.lastUpdated = Date.now();
-
-
   }
 
   initPlayer = ( socket ) => {
@@ -192,6 +186,13 @@ class Avalon {
       if (this.voted.length === this.players.length) {
         this.canRevealVote = true;
       }
+    } 
+    else {
+      this.privateVotes[ballot.player] = ballot.vote;
+      this.voted.push(ballot.player);
+      if (this.voted.length === this.questors.length) {
+        this.canRevealVote = true;
+      }
     }
     this.updateWatchers();
   }
@@ -210,6 +211,7 @@ class Avalon {
 
   requestQuestVote = () => {
     this.lastUpdated = Date.now();
+    this.voteType = this.questStarted ? 'private' : 'public';
     this.voteRequested = true;
     this.voted = [];
     this.publicVotes = {};
@@ -228,15 +230,88 @@ class Avalon {
       if (yes > Math.floor(totalVotes / 2) ) {
         this.questCanStart = true;
         this.questors = [...this.nominees];
-        this.voteResult = `Yes: ${yes} - No: ${Math.abs(totalVotes - yes)}`;
       }
       else {
         this.questTeamVoteFails++;
-        
-
+        this.shouldRedoTeamVote = true;
       }
+      this.voteResult = `Yes: ${yes} - No: ${Math.abs(totalVotes - yes)}`;
     }
-    else {}
+    else {
+      const totalVotes = this.questors.length;
+      const yes = Object.values(this.privateVotes).reduce((count, curr) => {
+        return curr ? count + 1 : count;
+      }, 0);
+      if (yes === totalVotes) {
+        this.questFailed = false;
+        this.questWins++;
+      }
+      else {
+        this.questFails++;
+        this.questFailed = true;
+      }
+      this.voteResult = `Success: ${yes} - Fail: ${Math.abs(totalVotes - yes)}`;
+      this.canMoveToNextRound = true;
+    }
+    this.updateWatchers();
+  }
+
+  redoTeamVote = (data) => {
+    this.lastUpdated = Date.now();
+    this.nominees = [];
+    this.publicVotes = {};
+    this.privateVotes = {};
+    this.voted = [];
+    this.questors = [];
+    this.voteResult = '';
+    this.voteRequested = false;
+    this.questStarted = false;
+    this.questCanStart = false;
+    this.canRevealVote = false;
+    this.showVoteResult = false;
+    this.questFailed = false;
+    this.shouldRedoTeamVote = false;
+    this.updateWatchers();
+  }
+
+  startNextRound = (data) => {
+    this.lastUpdated = Date.now();
+    this.canMoveToNextRound = false;
+
+    const currTurn = this.turn;
+    const idx = this.players.indexOf(currTurn);
+    const nextIdx = (idx + 1) % this.players.length;
+    this.turn = this.players[nextIdx]
+
+    this.questTeamVoteFails = 0;
+    this.nominees = [];
+    this.publicVotes = {};
+    this.privateVotes = {};
+    this.voted = [];
+    this.questors = [];
+    this.voteResult = '';
+    this.voteRequested = false;
+    this.questStarted = false;
+    this.questCanStart = false;
+    this.canRevealVote = false;
+    this.showVoteResult = false;
+    this.questFailed = false;
+    this.updateWatchers();
+  }
+
+  startQuest = (data) => {
+    this.lastUpdated = Date.now();
+    this.questors = [...this.nominees];
+    this.nominees = [];
+    this.publicVotes = {};
+    this.voted = [];
+    this.voteResult = '';
+    this.voteRequested = false;
+    this.questStarted = true;
+    this.questCanStart = false;
+    this.canRevealVote = false;
+    this.showVoteResult = false;
+    this.questFailed = false;
     this.updateWatchers();
   }
 
@@ -253,7 +328,7 @@ class Avalon {
     this.sockets.forEach( socket => {
       if ( socket && socket.readyState === socket.OPEN) {
         const publicVotes = (this.showVoteResult && this.voteType === 'public') ? { ...this.publicVotes } : undefined;
-        const privateVotes = (this.showVoteResult && this.voteType === 'private' ) ? "count" : undefined;
+        const privateVotes = (this.showVoteResult && this.voteType === 'private' ) ? this.voted.length : undefined;
         const data = {
           players: [...this.players],
           started: this.started,
@@ -272,7 +347,14 @@ class Avalon {
           showVoteResult: this.showVoteResult,
           questTeamVoteFails: this.questTeamVoteFails,
           voteResult: this.voteResult,
-          questCanStart: this.questCanStart
+          questCanStart: this.questCanStart,
+          questStarted: this.questStarted,
+          questors: [...this.questors],
+          questFails: this.questFails,
+          questFailed: this.questFailed,
+          questWins: this.questWins,
+          canMoveToNextRound: this.canMoveToNextRound,
+          shouldRedoTeamVote: this.shouldRedoTeamVote,
         };
         socket.send( JSON.stringify( data ) );
       }

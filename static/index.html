@@ -175,11 +175,12 @@
         clearLists();
 
         started.forEach( game => {
+          console.log(game)
           const a = document.createElement( 'a' );
           a.href = `/games/${game.id}`;
 
           const li = document.createElement( 'li' );
-          li.innerText = `${game.game} played by ${game.player1} and ${game.player2}`;
+          li.innerText = `${game.game} played by ${game.players[0]} and ${game.players[2]}`;
           li.id = game.id;
 
           a.appendChild( li );
@@ -188,6 +189,7 @@
         if ( started.length === 0 ) gameList.innerHTML = '<li>No ongoing games yet</li>';
 
         created.forEach( game => {
+          console.log(game)
           const li = document.createElement( 'li' );
           li.style.listStyle = 'none';
 
@@ -205,7 +207,7 @@
 
           const label = document.createElement( 'label' );
           label.for = `game-${game.id}`;
-          label.innerText = `${game.game} played by ${game.player1} and ...you ?`;
+          label.innerText = `${game.game} played by ${game.players[0]} and ...you ?`;
           label.style.marginLeft = '6px';
 
           li.appendChild( input );

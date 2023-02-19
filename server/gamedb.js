@@ -60,7 +60,8 @@ class GameDB {
     return started.map( game => {
       return {
         player1: game.player1,
-        player2: game.player2,
+        player1: game.player2,
+        players: game.players,
         game: game.type,
         id: game.id
       }
@@ -72,7 +73,7 @@ class GameDB {
     const notstarted = games.filter(game => !game.started);
     return notstarted.map( game => {
       return {
-        player1: game.player1,
+        players: game.players,
         game: game.type,
         id: game.id
       }

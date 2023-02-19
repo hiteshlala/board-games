@@ -215,6 +215,8 @@
               <div id="vote-result"></div>
               <button id="start-quest-button" class="hide" onclick="startQuest()">Start Quest</button>
             </div>
+            <button id="next-round" class="hide" onclick="nextRound()">Next Round - Leader Change</button>
+            <button id="redo-team-vote" class="hide" onclick="redoTeamVote()">Redo Team Vote</button>
           </div>
         </div>
 
@@ -231,6 +233,8 @@
         <div>
           <a href="https://avalon.fun/pdfs/rules.pdf" target="_blank">Based on these rules...</a>
         </div>
+
+        <div id="score"></div>
       </div>
     </div>
 
@@ -248,6 +252,8 @@
       const revealVoteSection = document.getElementById('reveal-vote-section');
       const revealButton = document.getElementById('reveal-button');
       const startQuestButton = document.getElementById('start-quest-button');
+      const nextRoundButton = document.getElementById('next-round');
+      const redoTeamVoteButton = document.getElementById('redo-team-vote');
 
       let player = '';
       let gameid = '';
@@ -258,7 +264,6 @@
       let maxPlayers = -1;
       let isOwner = false;
       let started = false;
-      let voted = false;
     
 
       chatinput.addEventListener( 'keydown', sendChat );
@@ -354,6 +359,13 @@
           console.log(msg.impersonating);
         }
 
+        if (msg.started) {
+          document.getElementById('score').innerHTML =`
+            <div>Good Wins: ${msg.questWins}</div>
+            <div>Evil Wins: ${msg.questFails}</div>
+            <div>Team Creation Fails: ${msg.questTeamVoteFails}</div>`;
+        }
+
         if (msg.turn) {
           if(msg.turn === player && !msg.voteRequested) {
             requestQuestVoteEl.classList.remove('hide');
@@ -367,22 +379,45 @@
           requestQuestVoteEl.classList.add('hide');
           if((msg.voted || []).includes(player)) {
             voteSection.classList.add('hide');
-            voted = true;
             if (player === msg.turn) {
               revealVoteSection.classList.remove('hide');
             }
           }
           else {
-            voteSection.classList.remove('hide');
+            if (msg.questStarted) {
+              if ((msg.questors || []).includes(player) ) {
+                voteSection.classList.remove('hide');
+                revealButton.classList.remove('hide');  
+              }
+              else if (player === msg.turn) {
+                revealVoteSection.classList.remove('hide');
+                revealButton.disabled = true;
+                revealButton.classList.remove('hide');  
+              }
+              else {
+                voteSection.classList.add('hide');
+              }
+            }
+            else {
+              voteSection.classList.remove('hide');
+            }
           }
         }
 
+        if (msg.canMoveToNextRound && msg.turn === player) {
+          nextRoundButton.classList.remove('hide')
+        } else {
+          nextRoundButton.classList.add('hide')
+        }
+
         if (msg.canRevealVote) {
+          console.log(`%c canrevealvote`, 'color:#fc03f0', msg.turn === player);
           if (msg.turn === player) {
             // revealVoteSection.classList.remove('hide');
             revealButton.disabled = false;
           }
         }
+
         if (msg.showVoteResult) {
           revealButton.disabled = true;
           revealButton.classList.add('hide');
@@ -395,18 +430,23 @@
         }
 
         if (msg.voteResult && !msg.questCanStart && msg.turn === player) {
-          // restart voting button
+          // todo: restart voting button
           startQuestButton.classList.add('hide');
         }
 
         if (msg.voteResult && msg.questCanStart && msg.turn === player) {
-          // start quest button
           startQuestButton.classList.remove('hide');
         }
 
+        if (msg.questStarted) {
+          startQuestButton.classList.add('hide');
+        }
 
-
-        
+        if (msg.shouldRedoTeamVote) {
+          redoTeamVoteButton.classList.remove('hide');
+        } else {
+          redoTeamVoteButton.classList.add('hide');
+        }
 
         if ( msg.players) {
           if (!started) {
@@ -429,7 +469,8 @@
             const voteRequested = msg.voteRequested;
             const showVoteResult = msg.showVoteResult;
             const publicVotes = msg.publicVotes || {};
-            const isCurrentLeader = msg.turn === player;
+            const questStarted = msg.questStarted;
+            const questors = msg.questors || [];
 
             playStatuses.innerText = '';
             for (let pl of msg.players) {
@@ -458,13 +499,18 @@
               }
               panel.appendChild(pName);
 
-              const pTurn = document.createElement( 'div' )
-              pTurn.classList.add( isCurrentLeader && thisIsPlayer  ? 'red-b' : 'gray-b')
-              pTurn.innerText = 'Leader';
-              panel.appendChild(pTurn)
+              if (msg.turn === pl) {
+                const pTurn = document.createElement( 'div' )
+                pTurn.classList.add('red-b')
+                pTurn.innerText = 'Leader';
+                panel.appendChild(pTurn)
+              }
 
               const pSelect = document.createElement('div');
-              if (isCurrentLeader) {
+              if (questStarted) {
+                // no op - do not show nomination part.
+              }
+              else if (msg.turn === player) {
                 pSelect.innerHTML= `<input type="checkbox" oninput="nominate(this, '${pl}')" ${nominees.includes(pl) ? 'checked' : ''} ${voteRequested ? 'disabled': ''}> Nominate</input>`
               }
               else {
@@ -476,6 +522,12 @@
                 const pVote = document.createElement('div');
                 pVote.innerText = publicVotes[pl] ? 'Voted Yes!' : 'Voted No!';
                 panel.appendChild(pVote);
+              }
+
+              if (questStarted && questors.includes(pl)) {
+                const pQuest = document.createElement('div');
+                pQuest.innerText = 'On A Quest!';
+                panel.appendChild(pQuest);
               }
 
 
@@ -528,12 +580,19 @@
       }
 
       function vote(option) {
-        if (voted) return;
         sendMessage({ vote: { player, vote: option === 'yes' }});
       }
 
       function startQuest() {
         sendMessage({ startQuest: true });
+      }
+
+      function nextRound() {
+        sendMessage({ startNextRound: true });
+      }
+
+      function redoTeamVote() {
+        sendMessage({ redoTeamVote: true });
       }
 
       function genericError( e ) {
