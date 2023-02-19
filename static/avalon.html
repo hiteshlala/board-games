@@ -246,9 +246,10 @@
       const waitingView = document.getElementById('waiting-room-side');
       const activeView = document.getElementById('active-game');
       const playStatuses = document.getElementById('player-statuses');
-      const requestQuestVoteEl = document.getElementById('request-quest-vote');
-      const voteSection = document.getElementById('vote-section');
-      const revealButton = document.getElementById('reveal-button');
+
+      const requestQuestTeamVoteButton = document.getElementById('request-quest-vote');
+      const voteYesNoButtons = document.getElementById('vote-section');
+      const revealVoteResultButton = document.getElementById('reveal-button');
       const startQuestButton = document.getElementById('start-quest-button');
       const nextRoundButton = document.getElementById('next-round');
       const redoTeamVoteButton = document.getElementById('redo-team-vote');
@@ -367,38 +368,37 @@
 
         if (msg.turn) {
           if(msg.turn === player && !msg.voteRequested) {
-            requestQuestVoteEl.classList.remove('hide');
+            requestQuestTeamVoteButton.classList.remove('hide');
           }
           else {
-            requestQuestVoteEl.classList.add('hide');
+            requestQuestTeamVoteButton.classList.add('hide');
           }
         }
 
         if (msg.voteRequested) {
-          requestQuestVoteEl.classList.add('hide');
+          requestQuestTeamVoteButton.classList.add('hide');
           if((msg.voted || []).includes(player)) {
-            voteSection.classList.add('hide');
+            voteYesNoButtons.classList.add('hide');
             if (player === msg.turn) {
-              revealButton.classList.remove('hide');
+              revealVoteResultButton.classList.remove('hide');
             }
           }
           else {
             if (msg.questStarted) {
               if ((msg.questors || []).includes(player) ) {
-                voteSection.classList.remove('hide');
-                revealButton.classList.remove('hide');  
+                voteYesNoButtons.classList.remove('hide');
+                revealVoteResultButton.classList.remove('hide');  
               }
               else if (player === msg.turn) {
-                revealButton.classList.remove('hide');
-                revealButton.disabled = true;
-                revealButton.classList.remove('hide');  
+                revealVoteResultButton.disabled = true;
+                revealVoteResultButton.classList.remove('hide');  
               }
               else {
-                voteSection.classList.add('hide');
+                voteYesNoButtons.classList.add('hide');
               }
             }
             else {
-              voteSection.classList.remove('hide');
+              voteYesNoButtons.classList.remove('hide');
             }
           }
         }
@@ -411,13 +411,13 @@
 
         if (msg.canRevealVote) {
           if (msg.turn === player) {
-            revealButton.disabled = false;
+            revealVoteResultButton.disabled = false;
           }
         }
 
         if (msg.showVoteResult) {
-          revealButton.disabled = true;
-          revealButton.classList.add('hide');
+          revealVoteResultButton.disabled = true;
+          revealVoteResultButton.classList.add('hide');
         }
 
         if (msg.voteResult !== undefined) {
@@ -524,11 +524,6 @@
                 panel.appendChild(pQuest);
               }
 
-
-
-              
-
-
               playStatuses.appendChild(panel);
             }
           }
@@ -539,12 +534,11 @@
           ownerActions.classList.remove('hide');
           startButton.classList.remove('hide');
         }
-
-
         
         if ( msg.message ) {
           alert( msg.message );
         }
+
         if ( msg.chat ) {
           const p = document.createElement( 'p' );
           p.innerText = `${msg.chat.player}: ${msg.chat.text}`;
