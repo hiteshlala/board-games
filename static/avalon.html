@@ -209,9 +209,7 @@
               <button onclick="vote('yes')">Yes</button>
               <button onclick="vote('no')">No</button>
             </div>
-            <div id="reveal-vote-section" class="hide">
-              <button id="reveal-button" onclick="revealVotes()" disabled>Reveal Votes</button>
-            </div>
+            <button id="reveal-button" class="hide"onclick="revealVotes()" disabled>Reveal Votes</button>
             <div id="vote-result"></div>
             <button id="start-quest-button" class="hide" onclick="startQuest()">Start Quest</button>
             <button id="next-round" class="hide" onclick="nextRound()">Next Round - Leader Change</button>
@@ -250,7 +248,6 @@
       const playStatuses = document.getElementById('player-statuses');
       const requestQuestVoteEl = document.getElementById('request-quest-vote');
       const voteSection = document.getElementById('vote-section');
-      const revealVoteSection = document.getElementById('reveal-vote-section');
       const revealButton = document.getElementById('reveal-button');
       const startQuestButton = document.getElementById('start-quest-button');
       const nextRoundButton = document.getElementById('next-round');
@@ -382,7 +379,7 @@
           if((msg.voted || []).includes(player)) {
             voteSection.classList.add('hide');
             if (player === msg.turn) {
-              revealVoteSection.classList.remove('hide');
+              revealButton.classList.remove('hide');
             }
           }
           else {
@@ -392,7 +389,7 @@
                 revealButton.classList.remove('hide');  
               }
               else if (player === msg.turn) {
-                revealVoteSection.classList.remove('hide');
+                revealButton.classList.remove('hide');
                 revealButton.disabled = true;
                 revealButton.classList.remove('hide');  
               }
