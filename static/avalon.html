@@ -19,12 +19,6 @@
       .hide {
         display: none !important;
       }
-      .red-b {
-        background-color: red;
-      }
-      .gray-b {
-        background-color: gray;
-      }
 
       #chats {
         width: 100%;
@@ -132,26 +126,42 @@
         justify-content: space-between;
       }
       .player-status {
+        position: relative;
+        text-align: center;
         width: 150px;
         height: 150px;
         border: 1px solid burlywood;
+        border-radius: 5px;
         margin: 5px;
         padding: 5px;
       }
-
+      .leader {
+        background-color: red;
+        color: white;
+        position: absolute;
+        bottom: 2%;
+        right: 2%;
+        padding: 5px;
+        border-radius: 5px;
+      }
+      .name-line {
+        padding-bottom: 3px;
+        border-bottom: 1px solid burlywood;
+      }
+      .padd-line-top-bottom {
+        padding-top: 3px;
+        padding-bottom: 3px;
+      }
 
       .action-bar {
-        width: 100%;
         min-height: 100px;
-        background-color: pink;
-        /* display: flex; */
-        /* line-height: 100px; */
-
+        background-color: bisque;
+        text-align: center;
+        padding: 20px;
+        border-radius: 5px;
       }
-      .request-quest-vote {
-        height: 35px;
-        width: 162px;
-        margin: 33px auto;
+      .action-bar button { 
+        margin: 10px;
       }
 
       .me {
@@ -159,11 +169,15 @@
       }
 
       .evil {
-        background-color: rgb(255, 165, 165);
+        background-color: rgb(253, 199, 255);
       }
 
-      
-      
+      .greeting, .score {
+        padding: 3px;
+        border: 1px solid burlywood;
+        border-radius: 5px;
+        margin: 3px;
+      }
     </style>
   </head>
   <body>
@@ -231,9 +245,9 @@
           <a href="https://avalon.fun/pdfs/rules.pdf" target="_blank">Based on these rules...</a>
         </div>
 
-        <div id="greeting"></div>
+        <div id="greeting" class="greeting"></div>
 
-        <div id="score"></div>
+        <div id="score" class="score"></div>
       </div>
     </div>
 
@@ -253,6 +267,8 @@
       const startQuestButton = document.getElementById('start-quest-button');
       const nextRoundButton = document.getElementById('next-round');
       const redoTeamVoteButton = document.getElementById('redo-team-vote');
+
+      const greeting = document.getElementById('greeting');
 
       let player = '';
       let gameid = '';
@@ -350,7 +366,8 @@
 
         if (msg.impersonating) {
           const {character, isEvil} = msg.impersonating;
-          document.getElementById('greeting').innerHTML = `I am <b>${character}</b> and am a servant of ${isEvil ? 'Mordred' : 'Arthur'}`;
+          greeting.innerHTML = `I am <b>${character}</b> and am a servant of ${isEvil ? 'Mordred' : 'Arthur'}`;
+          isEvil && greeting.classList.add('evil');
         }
 
         if (msg.started) {
@@ -437,11 +454,12 @@
               else { 
                 pName.innerText = pl;
               }
+              pName.classList.add('name-line');
               panel.appendChild(pName);
 
               if (msg.turn === pl) {
                 const pTurn = document.createElement( 'div' )
-                pTurn.classList.add('red-b')
+                pTurn.classList.add('leader')
                 pTurn.innerText = 'Leader';
                 panel.appendChild(pTurn)
               }
@@ -456,17 +474,20 @@
               else {
                 pSelect.innerHTML= `<div>${nominees.includes(pl) ? 'Nominated' : ''}</div>`;
               }
+              pSelect.classList.add('padd-line-top-bottom')
               panel.appendChild(pSelect);
 
               if (showVoteResult && publicVotes[pl] !== undefined) {
                 const pVote = document.createElement('div');
                 pVote.innerText = publicVotes[pl] ? 'Voted Yes!' : 'Voted No!';
+                pVote.classList.add('padd-line-top-bottom')
                 panel.appendChild(pVote);
               }
 
               if (questStarted && questors.includes(pl)) {
                 const pQuest = document.createElement('div');
                 pQuest.innerText = 'On A Quest!';
+                pQuest.classList.add('padd-line-top-bottom')
                 panel.appendChild(pQuest);
               }
 
