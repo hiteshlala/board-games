@@ -360,41 +360,10 @@
             <div>Team Creation Fails: ${msg.questTeamVoteFails}</div>`;
         }
 
-
-        if (msg.voteRequested) {
-          if((msg.voted || []).includes(player)) {
-            if (player === msg.turn) {
-              revealVoteResultButton.classList.remove('hide');
-            }
-          }
-          else {
-            if (msg.questStarted) {
-              if ((msg.questors || []).includes(player) ) {
-                revealVoteResultButton.classList.remove('hide');  
-              }
-              else if (player === msg.turn) {
-                revealVoteResultButton.disabled = true;
-                revealVoteResultButton.classList.remove('hide');  
-              }
-            }
-          }
-        }
-
         if (msg.canMoveToNextRound && msg.turn === player) {
           nextRoundButton.classList.remove('hide')
         } else {
           nextRoundButton.classList.add('hide')
-        }
-
-        if (msg.canRevealVote) {
-          if (msg.turn === player) {
-            revealVoteResultButton.disabled = false;
-          }
-        }
-
-        if (msg.showVoteResult) {
-          revealVoteResultButton.disabled = true;
-          revealVoteResultButton.classList.add('hide');
         }
 
         if (msg.voteResult !== undefined) {
@@ -527,6 +496,7 @@
 
         requestQuestTeamVoteButtonState(msg);
         voteYesNoButtonsState(msg);
+        revealVoteResultButtonState(msg);
       }
 
       function nominate(inpEl, person) {
@@ -611,6 +581,27 @@
         } else {
             voteYesNoButtons.classList.remove('hide');
         }
+      }
+
+      function revealVoteResultButtonState(msg) {
+        if (player !== msg.turn || !msg.voteRequested) {
+          revealVoteResultButton.classList.add('hide');
+          return;
+        }
+
+        if (msg.canRevealVote) {
+          revealVoteResultButton.disabled = false;
+        } else {
+          revealVoteResultButton.disabled = true;
+        }
+
+        if (msg.showVoteResult) {
+          revealVoteResultButton.disabled = true;
+          revealVoteResultButton.classList.add('hide');
+          return;
+        }
+
+        revealVoteResultButton.classList.remove('hide');
       }
 
     </script>
