@@ -360,17 +360,8 @@
             <div>Team Creation Fails: ${msg.questTeamVoteFails}</div>`;
         }
 
-        if (msg.turn) {
-          if(msg.turn === player && !msg.voteRequested) {
-            requestQuestTeamVoteButton.classList.remove('hide');
-          }
-          else {
-            requestQuestTeamVoteButton.classList.add('hide');
-          }
-        }
 
         if (msg.voteRequested) {
-          requestQuestTeamVoteButton.classList.add('hide');
           if((msg.voted || []).includes(player)) {
             voteYesNoButtons.classList.add('hide');
             if (player === msg.turn) {
@@ -541,10 +532,11 @@
           p.scrollIntoView();
         }
         
+
+        requestQuestTeamVoteButtonState(msg);
       }
 
       function nominate(inpEl, person) {
-        console.log(`%c nominate: ${person} ${inpEl.checked}`, 'color:#fc03f0');
         if(inpEl.checked) {
           sendMessage({ nominate: person });
         }
@@ -595,6 +587,16 @@
         }
         else {
           alert( 'Failed - Socket Closed' );
+        }
+      }
+
+      function requestQuestTeamVoteButtonState(msg) {
+        if (msg.voteRequested) {
+          requestQuestTeamVoteButton.classList.add('hide');
+        } else if (msg.turn === player) {
+          requestQuestTeamVoteButton.classList.remove('hide');
+        } else {
+          requestQuestTeamVoteButton.classList.add('hide');
         }
       }
 
