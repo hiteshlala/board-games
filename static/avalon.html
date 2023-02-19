@@ -202,6 +202,7 @@
 
         <div id="active-game" class="hide">
           <div id="player-statuses" class="player-statuses"></div>
+
           <div id="action-bar" class="action-bar">
             <button id="request-quest-vote" class="request-quest-vote hide" onclick="requestQuestVote()">Request Quest Vote</button>
             <div id="vote-section" class="hide">
@@ -211,10 +212,10 @@
             <div id="reveal-vote-section" class="hide">
               <button id="reveal-button" onclick="revealVotes()" disabled>Reveal Votes</button>
             </div>
-            <div>
+            <!-- <div> -->
               <div id="vote-result"></div>
               <button id="start-quest-button" class="hide" onclick="startQuest()">Start Quest</button>
-            </div>
+            <!-- </div> -->
             <button id="next-round" class="hide" onclick="nextRound()">Next Round - Leader Change</button>
             <button id="redo-team-vote" class="hide" onclick="redoTeamVote()">Redo Team Vote</button>
           </div>
@@ -233,6 +234,8 @@
         <div>
           <a href="https://avalon.fun/pdfs/rules.pdf" target="_blank">Based on these rules...</a>
         </div>
+
+        <div id="greeting"></div>
 
         <div id="score"></div>
       </div>
@@ -356,7 +359,8 @@
         }
 
         if (msg.impersonating) {
-          console.log(msg.impersonating);
+          const {character, isEvil} = msg.impersonating;
+          document.getElementById('greeting').innerText = `I am ${character} and am a servant of ${isEvil ? 'Mordred' : 'Arthur'}`;
         }
 
         if (msg.started) {
@@ -411,9 +415,7 @@
         }
 
         if (msg.canRevealVote) {
-          console.log(`%c canrevealvote`, 'color:#fc03f0', msg.turn === player);
           if (msg.turn === player) {
-            // revealVoteSection.classList.remove('hide');
             revealButton.disabled = false;
           }
         }
@@ -421,8 +423,6 @@
         if (msg.showVoteResult) {
           revealButton.disabled = true;
           revealButton.classList.add('hide');
-          // requestQuestVoteEl.classList.remove('hide');
-
         }
 
         if (msg.voteResult !== undefined) {
@@ -430,7 +430,6 @@
         }
 
         if (msg.voteResult && !msg.questCanStart && msg.turn === player) {
-          // todo: restart voting button
           startQuestButton.classList.add('hide');
         }
 
