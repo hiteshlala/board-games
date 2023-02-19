@@ -280,10 +280,6 @@
         }
       }
 
-      function redraw() {
-        console.log('%c should draw something', 'color:#fc03f0');
-      }
-
       function startGame() {
         const charactersToAdd = [];
         ['merlin', 'assassin', 'morgana', 'percival'].forEach(ch => {
@@ -336,8 +332,6 @@
         });
         socket.addEventListener('message', socketMessage);
         socket.addEventListener('error', genericError);
-
-        redraw();
       };
 
       function socketMessage( m ) {
@@ -356,7 +350,7 @@
 
         if (msg.impersonating) {
           const {character, isEvil} = msg.impersonating;
-          document.getElementById('greeting').innerText = `I am ${character} and am a servant of ${isEvil ? 'Mordred' : 'Arthur'}`;
+          document.getElementById('greeting').innerHTML = `I am <b>${character}</b> and am a servant of ${isEvil ? 'Mordred' : 'Arthur'}`;
         }
 
         if (msg.started) {
