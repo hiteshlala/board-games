@@ -382,7 +382,7 @@
           startQuestButton.classList.add('hide');
         }
 
-        if (msg.shouldRedoTeamVote) {
+        if (msg.shouldRedoTeamVote && msg.turn === player) {
           redoTeamVoteButton.classList.remove('hide');
         } else {
           redoTeamVoteButton.classList.add('hide');
