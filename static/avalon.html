@@ -138,9 +138,20 @@
         margin: 5px;
         padding: 5px;
       }
+
+
       .action-bar {
         width: 100%;
-        height: 100px;
+        min-height: 100px;
+        background-color: pink;
+        /* display: flex; */
+        /* line-height: 100px; */
+
+      }
+      .request-quest-vote {
+        height: 35px;
+        width: 162px;
+        margin: 33px auto;
       }
 
       .me {
@@ -150,6 +161,8 @@
       .evil {
         background-color: rgb(255, 165, 165);
       }
+
+      
       
     </style>
   </head>
@@ -190,7 +203,18 @@
         <div id="active-game" class="hide">
           <div id="player-statuses" class="player-statuses"></div>
           <div id="action-bar" class="action-bar">
-            <button>Do shit</button>
+            <button id="request-quest-vote" class="request-quest-vote hide" onclick="requestQuestVote()">Request Quest Vote</button>
+            <div id="vote-section" class="hide">
+              <button onclick="vote('yes')">Yes</button>
+              <button onclick="vote('no')">No</button>
+            </div>
+            <div id="reveal-vote-section" class="hide">
+              <button id="reveal-button" onclick="revealVotes()" disabled>Reveal Votes</button>
+            </div>
+            <div>
+              <div id="vote-result"></div>
+              <button id="start-quest-button" class="hide" onclick="startQuest()">Start Quest</button>
+            </div>
           </div>
         </div>
 
@@ -202,6 +226,10 @@
           <p class="warn">* Be warned, chats are visible to everyone!</p>
           <div id="chats"></div>
           <textarea id="chatin"></textarea>
+        </div>
+
+        <div>
+          <a href="https://avalon.fun/pdfs/rules.pdf" target="_blank">Based on these rules...</a>
         </div>
       </div>
     </div>
@@ -215,6 +243,11 @@
       const waitingView = document.getElementById('waiting-room-side');
       const activeView = document.getElementById('active-game');
       const playStatuses = document.getElementById('player-statuses');
+      const requestQuestVoteEl = document.getElementById('request-quest-vote');
+      const voteSection = document.getElementById('vote-section');
+      const revealVoteSection = document.getElementById('reveal-vote-section');
+      const revealButton = document.getElementById('reveal-button');
+      const startQuestButton = document.getElementById('start-quest-button');
 
       let player = '';
       let gameid = '';
@@ -225,6 +258,7 @@
       let maxPlayers = -1;
       let isOwner = false;
       let started = false;
+      let voted = false;
     
 
       chatinput.addEventListener( 'keydown', sendChat );
@@ -319,6 +353,59 @@
         if (msg.impersonating) {
           console.log(msg.impersonating);
         }
+
+        if (msg.turn) {
+          if(msg.turn === player && !msg.voteRequested) {
+            requestQuestVoteEl.classList.remove('hide');
+          }
+          else {
+            requestQuestVoteEl.classList.add('hide');
+          }
+        }
+
+        if (msg.voteRequested) {
+          requestQuestVoteEl.classList.add('hide');
+          if((msg.voted || []).includes(player)) {
+            voteSection.classList.add('hide');
+            voted = true;
+            if (player === msg.turn) {
+              revealVoteSection.classList.remove('hide');
+            }
+          }
+          else {
+            voteSection.classList.remove('hide');
+          }
+        }
+
+        if (msg.canRevealVote) {
+          if (msg.turn === player) {
+            // revealVoteSection.classList.remove('hide');
+            revealButton.disabled = false;
+          }
+        }
+        if (msg.showVoteResult) {
+          revealButton.disabled = true;
+          revealButton.classList.add('hide');
+          // requestQuestVoteEl.classList.remove('hide');
+
+        }
+
+        if (msg.voteResult !== undefined) {
+          document.getElementById('vote-result').innerText = msg.voteResult;
+        }
+
+        if (msg.voteResult && !msg.questCanStart && msg.turn === player) {
+          // restart voting button
+          startQuestButton.classList.add('hide');
+        }
+
+        if (msg.voteResult && msg.questCanStart && msg.turn === player) {
+          // start quest button
+          startQuestButton.classList.remove('hide');
+        }
+
+
+
         
 
         if ( msg.players) {
@@ -339,26 +426,27 @@
             const nominees = msg.nominees || [];
             const evil = msg.extraInfo?.evil || [];
             const roles = msg.extraInfo?.roles || [];
+            const voteRequested = msg.voteRequested;
+            const showVoteResult = msg.showVoteResult;
+            const publicVotes = msg.publicVotes || {};
+            const isCurrentLeader = msg.turn === player;
+
             playStatuses.innerText = '';
             for (let pl of msg.players) {
-              const isCurrentLeader = msg.turn === player;
               const thisIsPlayer = pl === player;
               const isEvil = evil.includes(pl);
+              const pRole = roles.filter(i => i.player === pl)[0];
 
               const panel = document.createElement( 'div' );
               panel.classList.add('player-status');
               if (thisIsPlayer) {
                 panel.classList.add('me');
               }
-              if (isEvil) {
-                console.log(pl, isEvil)
+              if (isEvil || (pRole && pRole.isEvil)) {
                 panel.classList.add('evil');  
               }
               
-
-              
               const pName = document.createElement( 'div' )
-              const pRole = roles.filter(i => i.player === pl)[0];
               if (thisIsPlayer) {
                 pName.innerText = `${pl} - ${msg.impersonating.character}`;  
               }
@@ -368,28 +456,34 @@
               else { 
                 pName.innerText = pl;
               }
-              panel.append(pName);
+              panel.appendChild(pName);
 
               const pTurn = document.createElement( 'div' )
               pTurn.classList.add( isCurrentLeader && thisIsPlayer  ? 'red-b' : 'gray-b')
               pTurn.innerText = 'Leader';
-              panel.append(pTurn)
+              panel.appendChild(pTurn)
 
               const pSelect = document.createElement('div');
-              
               if (isCurrentLeader) {
-                pSelect.innerHTML= `<input type="checkbox" oninput="nominate(this, '${pl}')" ${nominees.includes(pl) ? 'checked' : ''}> Nominate</input>`
+                pSelect.innerHTML= `<input type="checkbox" oninput="nominate(this, '${pl}')" ${nominees.includes(pl) ? 'checked' : ''} ${voteRequested ? 'disabled': ''}> Nominate</input>`
               }
               else {
-                pSelect.innerHTML= `<input type="checkbox" ${nominees.includes(pl) ? 'checked' : ''} disabled> Nominated</input>`
+                pSelect.innerHTML= `<div>${nominees.includes(pl) ? 'Nominated' : ''}</div>`;
               }
               panel.appendChild(pSelect);
 
+              if (showVoteResult && publicVotes[pl] !== undefined) {
+                const pVote = document.createElement('div');
+                pVote.innerText = publicVotes[pl] ? 'Voted Yes!' : 'Voted No!';
+                panel.appendChild(pVote);
+              }
+
+
 
               
 
 
-              playStatuses.append(panel);
+              playStatuses.appendChild(panel);
             }
           }
         }
@@ -423,7 +517,23 @@
         else {
           sendMessage({ denominate: person });
         }
+      }
 
+      function requestQuestVote() {
+        sendMessage({ requestQuestVote: true });
+      }
+
+      function revealVotes() {
+        sendMessage({ revealVotes: true });
+      }
+
+      function vote(option) {
+        if (voted) return;
+        sendMessage({ vote: { player, vote: option === 'yes' }});
+      }
+
+      function startQuest() {
+        sendMessage({ startQuest: true });
       }
 
       function genericError( e ) {

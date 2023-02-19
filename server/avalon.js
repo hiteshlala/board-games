@@ -66,17 +66,33 @@ class Avalon {
     this.nominees = [];
     this.publicVotes = {};
     this.privateVotes = {};
+    this.voteRequested = false;
+    this.voteType = 'public';
+    this.canRevealVote = false;
+    this.voted = [];
+    this.showVoteResult = false;
+    this.questTeamVoteFails = 0;
+    this.questCanStart = false;
+    this.questors = [];
+    this.voteResult = '';
+
+
+    
+
+
 
 
   }
 
   onSocketMessage = (m) => {
     const msg = JSON.parse(m);
-    if ( msg.move ) this.move( msg.move );
     if ( msg.chat ) this.chat( msg.chat );
     if ( msg.startGame ) this.startGame( msg.startGame );
     if ( msg.nominate ) this.nominate( msg.nominate );
     if ( msg.denominate ) this.denominate( msg.denominate );
+    if ( msg.requestQuestVote ) this.requestQuestVote( msg.requestQuestVote );
+    if ( msg.vote ) this.vote(msg.vote);
+    if (msg.revealVotes) this.revealVotes(msg.revealVotes);
   }
   onSocketClose = (e) => {
     console.log( 'socket close', e.message || e);
@@ -149,7 +165,7 @@ class Avalon {
       const impersonating = this.impersonations[pers];
       if (impersonating.character === 'merlin') {
         this.extraInfo[pers] = {
-          roles: [...impersonations]
+          roles: impersonations.map(i => ({...i, character: i.isEvil ? 'evil' : 'good'}))
         }
       }
       if (impersonating.character === 'percival') {
@@ -168,10 +184,15 @@ class Avalon {
     this.updateWatchers();
   }
 
-  move = ( data ) => {
+  vote = ( ballot ) => {
     this.lastUpdated = Date.now();
-    
-
+    if (this.voteType === 'public') {
+      this.publicVotes[ballot.player] = ballot.vote;
+      this.voted.push(ballot.player);
+      if (this.voted.length === this.players.length) {
+        this.canRevealVote = true;
+      }
+    }
     this.updateWatchers();
   }
 
@@ -187,7 +208,40 @@ class Avalon {
     this.updateWatchers();
   }
 
+  requestQuestVote = () => {
+    this.lastUpdated = Date.now();
+    this.voteRequested = true;
+    this.voted = [];
+    this.publicVotes = {};
+    this.privateVotes = {};
+    this.updateWatchers();
+  }
+  
+  revealVotes = (reveal) => {
+    this.lastUpdated = Date.now();
+    this.showVoteResult = reveal;
+    if (this.voteType === 'public') {
+      const totalVotes = this.players.length;
+      const yes = Object.values(this.publicVotes).reduce((count, curr) => {
+        return curr ? count + 1 : count;
+      }, 0);
+      if (yes > Math.floor(totalVotes / 2) ) {
+        this.questCanStart = true;
+        this.questors = [...this.nominees];
+        this.voteResult = `Yes: ${yes} - No: ${Math.abs(totalVotes - yes)}`;
+      }
+      else {
+        this.questTeamVoteFails++;
+        
+
+      }
+    }
+    else {}
+    this.updateWatchers();
+  }
+
   chat = ( data ) => {
+    this.lastUpdated = Date.now();
     this.sockets.forEach( socket => {
       if ( socket && socket.readyState === socket.OPEN) {
         socket.send( JSON.stringify({ chat: data }) );
@@ -198,6 +252,8 @@ class Avalon {
   updateWatchers = () => {
     this.sockets.forEach( socket => {
       if ( socket && socket.readyState === socket.OPEN) {
+        const publicVotes = (this.showVoteResult && this.voteType === 'public') ? { ...this.publicVotes } : undefined;
+        const privateVotes = (this.showVoteResult && this.voteType === 'private' ) ? "count" : undefined;
         const data = {
           players: [...this.players],
           started: this.started,
@@ -207,7 +263,16 @@ class Avalon {
           maxPlayers: this.maxPlayers,
           turn: this.turn,
           impersonating: this.impersonations[socket.gamePlayer],
-          nominees: [...this.nominees]
+          nominees: [...this.nominees],
+          voteRequested: this.voteRequested,
+          voted: [...this.voted],
+          canRevealVote: this.canRevealVote,
+          publicVotes,
+          privateVotes,
+          showVoteResult: this.showVoteResult,
+          questTeamVoteFails: this.questTeamVoteFails,
+          voteResult: this.voteResult,
+          questCanStart: this.questCanStart
         };
         socket.send( JSON.stringify( data ) );
       }
