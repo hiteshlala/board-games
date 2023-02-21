@@ -133,10 +133,10 @@
       function startGame() {
         if ( canStart ) {
           const type = getType();
-          console.log('type', type)
+          const _name = name.value.trim().replace(/ /g, '_');
           postRequest( '/games', {
             type,
-            player: name.value
+            player: _name
           })
           .then( r => {
             if ( r.gameid ) {
@@ -153,8 +153,9 @@
 
       function joinGame() {
         if ( canStart && canJoin ) {
+          const _name = name.value.trim().replace(/ /g, '_')
           postRequest( `/games/${gameIdToJoin}`, {
-            player: name.value
+            player: _name,
           })
           .then( r => {
             if ( r.gameid ) {
