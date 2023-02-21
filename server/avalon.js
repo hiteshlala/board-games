@@ -77,8 +77,6 @@ class Avalon {
     this.questWins = 0;
     this.questFailed = false;
     this.canMoveToNextRound = false;
-    this.shouldRedoTeamVote = false;
-
   }
 
   onSocketMessage = (m) => {
@@ -92,7 +90,6 @@ class Avalon {
     if (msg.revealVotes) this.revealVotes(msg.revealVotes);
     if (msg.startQuest) this.startQuest(msg.startQuest);
     if (msg.startNextRound) this.startNextRound(msg.startNextRound);
-    if (msg.redoTeamVote) this.redoTeamVote(msg.redoTeamVote);
   }
   onSocketClose = (e) => {
     console.log( 'socket close', e.message || e);
@@ -230,10 +227,11 @@ class Avalon {
       if (yes > Math.floor(totalVotes / 2) ) {
         this.questCanStart = true;
         this.questors = [...this.nominees];
+        this.questTeamVoteFails = 0;
       }
       else {
         this.questTeamVoteFails++;
-        this.shouldRedoTeamVote = true;
+        this.canMoveToNextRound = true;
       }
       this.voteResult = `Yes: ${yes} - No: ${Math.abs(totalVotes - yes)}`;
     }
@@ -256,24 +254,6 @@ class Avalon {
     this.updateWatchers();
   }
 
-  redoTeamVote = (data) => {
-    this.lastUpdated = Date.now();
-    this.nominees = [];
-    this.publicVotes = {};
-    this.privateVotes = {};
-    this.voted = [];
-    this.questors = [];
-    this.voteResult = '';
-    this.voteRequested = false;
-    this.questStarted = false;
-    this.questCanStart = false;
-    this.canRevealVote = false;
-    this.showVoteResult = false;
-    this.questFailed = false;
-    this.shouldRedoTeamVote = false;
-    this.updateWatchers();
-  }
-
   startNextRound = (data) => {
     this.lastUpdated = Date.now();
     this.canMoveToNextRound = false;
@@ -283,7 +263,6 @@ class Avalon {
     const nextIdx = (idx + 1) % this.players.length;
     this.turn = this.players[nextIdx]
 
-    this.questTeamVoteFails = 0;
     this.nominees = [];
     this.publicVotes = {};
     this.privateVotes = {};
@@ -354,7 +333,6 @@ class Avalon {
           questFailed: this.questFailed,
           questWins: this.questWins,
           canMoveToNextRound: this.canMoveToNextRound,
-          shouldRedoTeamVote: this.shouldRedoTeamVote,
         };
         socket.send( JSON.stringify( data ) );
       }

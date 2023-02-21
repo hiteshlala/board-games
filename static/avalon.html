@@ -227,7 +227,6 @@
             <div id="vote-result"></div>
             <button id="start-quest-button" class="hide" onclick="startQuest()">Start Quest</button>
             <button id="next-round" class="hide" onclick="nextRound()">Next Round - Leader Change</button>
-            <button id="redo-team-vote" class="hide" onclick="redoTeamVote()">Redo Team Vote</button>
           </div>
         </div>
 
@@ -266,7 +265,6 @@
       const revealVoteResultButton = document.getElementById('reveal-button');
       const startQuestButton = document.getElementById('start-quest-button');
       const nextRoundButton = document.getElementById('next-round');
-      const redoTeamVoteButton = document.getElementById('redo-team-vote');
 
       const greeting = document.getElementById('greeting');
 
@@ -304,7 +302,6 @@
           }
         });
 
-        console.log('%c start game', 'color:#fc03f0', charactersToAdd );
         sendMessage({
           startGame: {
             player,
@@ -397,12 +394,6 @@
 
         if (msg.questStarted) {
           startQuestButton.classList.add('hide');
-        }
-
-        if (msg.shouldRedoTeamVote && msg.turn === player) {
-          redoTeamVoteButton.classList.remove('hide');
-        } else {
-          redoTeamVoteButton.classList.add('hide');
         }
 
         if ( msg.players) {
@@ -547,10 +538,6 @@
 
       function nextRound() {
         sendMessage({ startNextRound: true });
-      }
-
-      function redoTeamVote() {
-        sendMessage({ redoTeamVote: true });
       }
 
       function genericError( e ) {
