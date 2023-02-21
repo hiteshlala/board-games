@@ -562,6 +562,11 @@
       }
 
       function requestQuestTeamVoteButtonState(msg) {
+        if (msg.nominees.length === 0 && msg.questors.length === 0) {
+          requestQuestTeamVoteButton.disabled = true;
+        } else {
+          requestQuestTeamVoteButton.disabled = false;
+        }
         if (msg.voteRequested) {
           requestQuestTeamVoteButton.classList.add('hide');
         } else if (msg.turn === player) {
