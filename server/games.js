@@ -60,9 +60,11 @@ games.post( '/games/:id', ctx => {
   const { player } = ctx.request.body;
   const gameid = ctx.params.id;
   const game = gameDb.getGame( gameid );
-  let canJoinGame =  game && !game.started && player;
-  let isSpaceToJoin = game.players.length < game.maxPlayers;
-  if ( canJoinGame && isSpaceToJoin ) {
+  let gameExists = game && player;
+  let gameNotStarted =  game && !game.started;
+  let isSpaceToJoin = game && game.players.length < game.maxPlayers;
+  let nameIsUnique = game && !game.players.includes(player);
+  if ( gameExists && gameNotStarted && isSpaceToJoin && nameIsUnique) {
     game.player2 = player;
     game.players.push(player);
     const cookie = createSessionCookieSetttings();
@@ -79,8 +81,13 @@ games.post( '/games/:id', ctx => {
     };
   }
   else {
+    let mesg = 'Can not join game.';
+    if(!gameExists) mesg += ' Game no longer available.' ;
+    if (gameExists && !gameNotStarted) mesg += ' Game has started.';
+    if (gameExists && !isSpaceToJoin) mesg += ' Game has max players.';
+    if (gameExists && !nameIsUnique) mesg += ` Game already has player with name "${player}".`;
     ctx.body = {
-      message: 'Game no longer available.'
+      message: mesg
     };
   }
   return ctx.body;
