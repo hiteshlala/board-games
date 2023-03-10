@@ -34,12 +34,12 @@ evil      2 2 3 3 3 4
 */
 
 const playersCount = {
-  "5": {good: 3, evil: 2},
-  "6": {good: 4, evil: 2},
-  "7": {good: 4, evil: 3},
-  "8": {good: 5, evil: 3},
-  "9": {good: 6, evil: 3},
-  "10": {good: 6, evil: 4},
+  "5": {good: 3, evil: 2, quests: [2,3,2,3,3]},
+  "6": {good: 4, evil: 2, quests: [2,3,4,3,4]},
+  "7": {good: 4, evil: 3, quests: [2,3,3,4,4]},
+  "8": {good: 5, evil: 3, quests: [3,4,4,5,5]},
+  "9": {good: 6, evil: 3, quests: [3,4,4,5,5]},
+  "10": {good: 6, evil: 4, quests: [3,4,4,5,5]},
 }
 
 const evilLables = ['morgana', 'assassin', 'evil'];
@@ -77,6 +77,7 @@ class Avalon {
     this.questWins = 0;
     this.questFailed = false;
     this.canMoveToNextRound = false;
+    this.questsState = [];
   }
 
   onSocketMessage = (m) => {
@@ -243,10 +244,12 @@ class Avalon {
       if (yes === totalVotes) {
         this.questFailed = false;
         this.questWins++;
+        this.questsState.push(true);
       }
       else {
         this.questFails++;
         this.questFailed = true;
+        this.questsState.push(false);
       }
       this.voteResult = `Success: ${yes} - Fail: ${Math.abs(totalVotes - yes)}`;
       this.canMoveToNextRound = true;
@@ -333,6 +336,7 @@ class Avalon {
           questFailed: this.questFailed,
           questWins: this.questWins,
           canMoveToNextRound: this.canMoveToNextRound,
+          questsState: this.questsState,
         };
         socket.send( JSON.stringify( data ) );
       }
