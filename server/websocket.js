@@ -9,6 +9,7 @@ const {
 function getCookie(name, cookiestring) {
   if (!name || !cookiestring || cookiestring.length === 0) return null;
   return cookiestring.split(';').reduce((result, pair) => {
+    // ***** This lowercases the username! ****** so enforce this on client side
     const keyval = pair.split('=').map((k) => k.toLowerCase().trim());
     return keyval[0] === name ? keyval[1] : result;
   }, null);

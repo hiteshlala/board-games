@@ -437,7 +437,7 @@
               
               const pName = document.createElement( 'div' )
               if (thisIsPlayer) {
-                pName.innerText = `${pl} - ${msg.impersonating.character}`;  
+                pName.innerText = `${pl} - ${msg.impersonating?.character}`;  
               }
               else if ( pRole ) {
                 pName.innerText = `${pl} - ${pRole.character}`;  

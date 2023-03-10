@@ -133,7 +133,7 @@
       function startGame() {
         if ( canStart ) {
           const type = getType();
-          const _name = name.value.trim().replace(/ /g, '_');
+          const _name = name.value.trim().replace(/ /g, '_').toLowerCase();
           postRequest( '/games', {
             type,
             player: _name
@@ -153,7 +153,7 @@
 
       function joinGame() {
         if ( canStart && canJoin ) {
-          const _name = name.value.trim().replace(/ /g, '_')
+          const _name = name.value.trim().replace(/ /g, '_').toLowerCase();
           postRequest( `/games/${gameIdToJoin}`, {
             player: _name,
           })
