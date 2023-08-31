@@ -20,7 +20,7 @@ const { createRandomKey } = require( './utils' );
 
   evil players know who else is evil
   Merlin knows who is evil
-  Percival knows who Merlin and Morgana could be
+  Percival knows who Merlin and Morgana could be when she is pretending to be Merlin
   Morgana pretends to be Merlin
   
   
@@ -162,7 +162,7 @@ class Avalon {
       }
       if (impersonating.character === 'percival') {
         this.extraInfo[pers] = {
-          roles: impersonations.filter( i => (i.character === 'merlin' || i.character === 'morgana')).map( i => ({...i, character: 'merlin'}))
+          roles: impersonations.filter( i => (i.character === 'merlin' || i.character === 'morgana')).map( i => ({...i, character: 'merlin', isEvil: false }))
         }
       }
       if (impersonating.isEvil) {
