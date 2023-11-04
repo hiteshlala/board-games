@@ -2,7 +2,7 @@
 
 A simple implementation of socket based Shogi and Go boards.
 
-Deployed: [Shogi or Go](http://hiteshlala.biz:6543)
+Deployed: [Shogi or Go](http://games.hiteshlala.info)
 
 * No game rules implemented - these are player enforced
 * Users can join a game 2 person
@@ -20,3 +20,23 @@ Deployed: [Shogi or Go](http://hiteshlala.biz:6543)
 - [x] Improve intuitiveness of landing page
  
   
+## Deploying
+
+- when deployed in shared box add the following to the nginx `/etc/nginx/sites-enabled/defualt` file.
+  ```
+  server {
+    listen 80;
+    listen [::]:80;
+    server_name games.hiteshlala.info;
+    location / {
+      proxy_pass http://146.190.115.5:6543;
+    }
+    location /websocket {
+      proxy_pass http://146.190.115.5:6543;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+                  proxy_set_header Connection "upgrade";
+                  proxy_read_timeout 120s;
+          }
+  }
+  ```
