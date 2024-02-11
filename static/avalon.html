@@ -549,7 +549,7 @@
         }
 
         if (msg.started) {
-          const {good, evil} = playersCount[msg.players.length]
+          const {good, evil} = playersCount[msg.players?.length]
           document.getElementById('score').innerHTML =`
             <div>${good} loyal servants of Arthur</div>
             <div>Good Wins: ${msg.questWins}</div>
@@ -584,7 +584,7 @@
 
         if ( msg.players) {
           if (!started) {
-            const numPlayers = msg.players.length;
+            const numPlayers = msg.players?.length;
             playersList.innerText = "";
             for (let pl of msg.players) {
               const p = document.createElement( 'p' );
@@ -749,7 +749,7 @@
       }
 
       function requestQuestTeamVoteButtonState(msg) {
-        if (msg.nominees.length === 0 && msg.questors.length === 0) {
+        if (msg.nominees?.length === 0 && msg.questors?.length === 0) {
           requestQuestTeamVoteButton.disabled = true;
         } else {
           requestQuestTeamVoteButton.disabled = false;
@@ -806,11 +806,11 @@
 
       function updateCurrentBoard(msg) {
         if (started && msg.questsState && msg.players) {
-          const allowedQuestNominations = playersCount[msg.players.length].quests;
-          for(let i = 0; i < allowedQuestNominations.length; i++) {
+          const allowedQuestNominations = playersCount[msg.players?.length].quests;
+          for(let i = 0; i < allowedQuestNominations?.length; i++) {
             const el = document.getElementById(`quest-${i+1}`);
             el.innerText = allowedQuestNominations[i];
-            if (msg.questsState.length == i) {
+            if (msg.questsState?.length == i) {
               el.classList.add('current-quest');
             } else {
               el.classList.remove('current-quest');
