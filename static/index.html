@@ -5,7 +5,7 @@
     <link rel="icon" href="icon.png" />
     <link rel="stylesheet" href="normalize.css"/>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Shogi or Go</title>
+    <title>Board Games</title>
     <style>
       svg {
         width: 14px;
@@ -44,7 +44,7 @@
       <div class="header">
         <img src="/icon.png">
         <img src="/go-icon.png">
-        <p> Shogi or Go</p>
+        <p> Board Games</p>
         <img src="/go-icon.png">
         <img src="/icon.png">
       </div>
@@ -96,6 +96,10 @@
             <input type="radio" name="game" id="game-avalon" value="avalon"/> 
             <label for="game-avalon">Avalon</label>
           </p>
+          <p class="left-space"> 
+            <input type="radio" name="game" id="game-bananagrams" value="bananagrams"/> 
+            <label for="game-bananagrams">Bananagrams</label>
+          </p>
           <p class="left-space"><input type="button" value="Create" id="start" disabled onclick="startGame()"/></p>
         </div>
 
@@ -110,6 +114,7 @@
       const shogi = document.getElementById( 'game-shogi' );
       const go = document.getElementById( 'game-go' );
       const avalon = document.getElementById( 'game-avalon' );
+      const bananagrams = document.getElementById( 'game-bananagrams' );
       const start = document.getElementById( 'start' );
       const name = document.getElementById( 'name' );
       const join = document.getElementById( 'join' );
@@ -125,7 +130,7 @@
       };
 
       function getType() {
-        return [shogi, go, avalon].reduce((prev, curr) => {
+        return [shogi, go, avalon, bananagrams].reduce((prev, curr) => {
           return curr.checked ? curr.value : prev;
         }, '');
       }
