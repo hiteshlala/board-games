@@ -8,8 +8,10 @@ const { createRandomKey } = require( './utils' );
 
   once started no new players can join
 
-
   start game:
+    create a board for each player - responsible for managing its tiles and where it lives on a grid
+    distribute tiles to each player - use player count to determine number of tiles
+    
 
 
   rules & other games:
@@ -138,36 +140,9 @@ class Board {
   constructor(language) {
     this.id = createRandomKey('board-xx-xxxx-xxxx');
     this.dimension = 20;
-
-    // this.board = {}; // do I really need this?
-    // this.makeEmptyBoard();
-    
     this.tiles = [];
     this.language = language;
   }
-
-  // makeEmptyBoard() {
-  //   for(let row = 0; row < this.dimension; row++) {
-  //     for(let col = 0; col < this.dimension; col++) {
-  //       this.board[`${col}-${row}`] = null;
-  //     }
-  //   }
-  // }
-
-  // printBoard() {
-  //   for(let y = 0; y < this.dimension; y++) {
-  //     let line = '';
-  //     for(let x = 0; x < this.dimension; x++) {
-  //       let letter = ' '
-  //       if (this.board[`${x}-${y}`]) {
-  //         const lang = this.board[`${x}-${y}`].language;
-  //         const letter = this.board[`${x}-${y}`][lang];
-  //       }
-  //       line = `${line} ${letter}`;
-  //     }
-  //     console.log(line);
-  //   }
-  // }
 
   moveTile({ col, row, tileId }) {
     const tile = this.tiles.find(t => t.id === tileId);
