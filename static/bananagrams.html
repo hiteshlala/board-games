@@ -125,6 +125,7 @@
         border-radius: 5px;
         margin: 3px;
         height: 200px;
+        overflow-y: scroll;
       }
 
       .game-board {
@@ -198,6 +199,17 @@
         background-color: seashell;
         border: 1px solid orangered;
       }
+      .exchange {
+        padding: 3px;
+        border-radius: 5px;
+        margin-top: 15px;
+        width: 200px;
+        height: 200px;
+        line-height: 200px;
+        text-align: center;
+        background-color: seashell;
+        border: 1px solid orangered;
+      }
 
 
     </style>
@@ -262,6 +274,14 @@
             <div class="spacer"></div>
           </div>
 
+          <div class="flexrow">
+            <div class="spacer"></div>
+            <div id="exchange" class="exchange"> Dump </div>
+            <div class="spacer"></div>
+            <button onclick="getOneTile()">Get A Tile</button>
+            <div class="spacer"></div>
+          </div>
+
         </div>
 
       </div>
@@ -297,6 +317,7 @@
       const miniBoards = document.getElementById('mini-boards');
       const tileBag = document.getElementById('tile-bag');
       const tileBoard = document.getElementById('tile-board');
+      const exchange = document.getElementById('exchange');
 
       let player = '';
       let gameid = '';
@@ -329,6 +350,26 @@
         tileBag.style.backgroundColor = 'seashell';
 
         sendMessage({ moveTile: data });
+      };
+
+      exchange.ondragover = (ev) => {
+        ev.preventDefault();
+        exchange.style.backgroundColor = 'green';
+      };
+      exchange.ondragleave = (ev) => {
+        ev.preventDefault();
+        exchange.style.backgroundColor = 'seashell';
+      };
+      exchange.ondrop = (ev) => {
+        ev.preventDefault();
+        const tileId = ev.dataTransfer.getData( 'text/plain' );
+        const data = {
+          player,
+          tileId,
+        };
+        exchange.style.backgroundColor = 'seashell';
+
+        sendMessage({ exchangeTile: data });
       };
 
 
@@ -605,6 +646,9 @@
         }
       }
 
+      function getOneTile() {
+        sendMessage({ getOneTile: { player } });
+      }
     </script>
   </body>
 </html>

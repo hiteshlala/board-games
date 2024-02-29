@@ -7,11 +7,13 @@ const { createRandomKey } = require( './utils' );
   owner of game can start the game
 
   once started no new players can join
+  once started player cannot change language
 
   start game:
     create a board for each player - responsible for managing its tiles and where it lives on a grid
     distribute tiles to each player - use player count to determine number of tiles
-    
+
+  
 
 
   rules & other games:
@@ -21,7 +23,6 @@ const { createRandomKey } = require( './utils' );
 
 */
 
-// https://web.archive.org/web/20090517070229/http://www.bananagrams-intl.com/instructions.asp
 const tilesByPlayersCount = {
   '2': 21,
   '3': 21,
@@ -43,7 +44,7 @@ class Tiles {
     {
       id: string identifier remains constant throught game
       language: selected language for player
-      board: players board id
+      placedOnBoard: if on a players board
       row: row index on board
       col: column index on board
       english: english letter
@@ -53,7 +54,6 @@ class Tiles {
   makeTiles() {
     const englishLetters = 'JKQXZJKQXZBCFHMPVWYBCFHMPVWYBCFHMPVWYGGGGLLLLLDSUDSUDSUDSUDSUDSUNNNNNNNNTRTRTRTRTRTRTRTRTROOOOOOOOOOOIIIIIIIIIIIIAAAAAAAAAAAAAEEEEEEEEEEEEEEEEEE';
     const ukrainianLetters = "'ҐЩФЄЮШЦЇЖЬЙХЧ'ҐЩФЄЮШЦЇЖЬЙХЧГБЯЗГБЯЗГБЯЗУПЛДУПЛДУПЛДУПЛДМСКВМСКВМСКВМСКВМСКВРТІЕРТІЕРТІЕРТІЕРТІЕРТІЕНИНИНИНИНИНИНИНИАААААААААААООООООООООООООООО"
-    console.log(ukrainianLetters.length)
     for(let i = 0; i < this.numTiles; i++) {
       this.tiles.push({
         id: createRandomKey('tile-xx-xxxx-xxxx'),
@@ -71,6 +71,20 @@ class Tiles {
     const index = Math.floor(Math.random() * this.tiles.length);
     const tile = this.tiles.splice(index, 1);
     return tile[0];
+  }
+
+  returnTile(tile) {
+    const selectThree = [];
+    for (let i = 0; i < 3; i++) {
+      let t = this.selectTile();
+      if (t) { selectThree.push(t); }
+    }
+    tile.placedOnBoard = false;
+    tile.row = -1;
+    tile.col = -1;
+    tile.language= '';
+    this.tiles.push(tile);
+    return selectThree;
   }
   
   /* 
@@ -142,6 +156,8 @@ class Board {
     this.dimension = 20;
     this.tiles = [];
     this.language = language;
+    this.board = [];
+    this.tilePool = [];
   }
 
   moveTile({ col, row, tileId }) {
@@ -149,19 +165,41 @@ class Board {
     tile.row = row;
     tile.col = col;
     tile.placedOnBoard = tile.row > -1 && tile.col > -1;
+    this.recount();
   }
 
   addTile(tile) {
     tile.language = this.language;
     this.tiles.push(tile);
+    this.recount();
+  }
+
+  recount() {
+    this.board = this.tiles.filter((tile) => tile.placedOnBoard);
+    this.tilePool = this.tiles.filter((tile) => !tile.placedOnBoard);
   }
 
   getBoard() {
-    return this.tiles.filter((tile) => tile.placedOnBoard);
+    return this.board;
   }
 
   getTilePool() {
-    return this.tiles.filter((tile) => !tile.placedOnBoard)
+    return this.tilePool;
+  }
+
+  returnTile(tileId) {
+    const tile = this.tiles.find(t => t.id === tileId);
+    this.tiles = this.tiles.filter(t => t.id !== tileId);
+    this.recount();
+    return tile;
+  }
+
+  addThree(tiles) {
+    tiles.forEach(tile => {
+      tile.language = this.language;
+      this.tiles.push(tile);
+    });
+    this.recount();
   }
 
 }
@@ -197,6 +235,8 @@ class Bananagrams {
     if (msg.startGame) this.startGame(msg.startGame);
     if (msg.selectLanguage) this.selectLanguage(msg.selectLanguage);
     if (msg.moveTile) this.moveTile(msg.moveTile);
+    if (msg.exchangeTile) this.exchangeTile(msg.exchangeTile);
+    if (msg.getOneTile) this.distributeTile();
 
   }
   onSocketClose = (e) => {
@@ -278,6 +318,26 @@ class Bananagrams {
   moveTile = ({tileId, player, row, col}) => {
     if (this.started) {
       this.playerBoards[player]?.moveTile({ tileId, row, col });
+      this.updateWatchers();
+    }
+  }
+
+  exchangeTile = ({tileId, player}) => {
+    if (this.started) {
+      const playerBoard = this.playerBoards[player];
+      const tileToReturn = playerBoard?.returnTile(tileId);
+      const selectThree = this.tiles.returnTile(tileToReturn);
+      playerBoard?.addThree(selectThree);
+      this.updateWatchers();
+    }
+  }
+
+  distributeTile = () => {
+    if (this.started) {
+      this.players.forEach((player) => {
+        let tile = this.tiles.selectTile();
+        this.playerBoards[player].addTile(tile);
+      });
       this.updateWatchers();
     }
   }
