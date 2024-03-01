@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Bananagrams</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       .upsidedown {
         transform: rotate(180deg);
       }
@@ -124,25 +127,21 @@
         border: 1px solid burlywood;
         border-radius: 5px;
         margin: 3px;
-        height: 200px;
+        height: 300px;
         overflow-y: scroll;
       }
 
-      .game-board {
+      .mini-board-area {
         padding: 5px;
         border: 1px solid burlywood;
         border-radius: 5px;
         max-width: 600px;
         margin: 3px;
         min-width: 450px;
-      }
-      .game-board-row-1 {
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
         justify-content: space-around;
-        margin-top: 10px;
-        margin-bottom: 10px;
       }
       
       .flexrow {
@@ -176,36 +175,50 @@
         height: 32px;
         flex-grow: 0;
         flex-shrink: 0;
+        padding: 2px;
       }
       .tile-piece {
         width: 27px;
         height: 27px;
         border-radius: 5%;
         border: 1px solid navy;
-        margin: 3px;
         line-height: 27px;
         text-align: center;
         background-color: #e7ccdb;
-        
       }
       .tile-bag {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
         justify-items: center;
-        width: 640px;
+        min-width: 200px;
+        max-width: 300px;
         margin-top: 15px;
         padding: 5px;
+        border-radius: 5px;
         background-color: seashell;
         border: 1px solid orangered;
       }
+      .tile-bag > .tile-piece {
+        margin: 5px;
+      }
       .exchange {
-        padding: 3px;
+        padding: 10%;
         border-radius: 5px;
         margin-top: 15px;
         width: 200px;
         height: 200px;
-        line-height: 200px;
+        text-align: center;
+        background-color: seashell;
+        border: 1px solid orangered;
+      }
+      .actions {
+        display: flex;
+        flex-direction: column;
+        padding: 5px;
+        border-radius: 5px;
+        margin-top: 15px;
+        height: 200px;
         text-align: center;
         background-color: seashell;
         border: 1px solid orangered;
@@ -250,15 +263,9 @@
         </div>
 
         <div id="active-game" class="hide">
-          <div class="flexrow">
+          <div class="mini-board-area">
             <div class="spacer"></div>
-            <div id="game-board" class="game-board">
-              <div class="game-board-row-1">
-                <div class="spacer"></div>
-                <div id="mini-boards"></div>
-                <div class="spacer"></div>
-              </div>
-            </div>
+            <div id="mini-boards"></div>
             <div class="spacer"></div>
           </div>
 
@@ -272,13 +279,13 @@
             <div class="spacer"></div>
             <div class="tile-bag" id="tile-bag"></div>
             <div class="spacer"></div>
-          </div>
-
-          <div class="flexrow">
+            <div id="exchange" class="exchange">Drop tile here to exchange it for 3 tiles</div>
             <div class="spacer"></div>
-            <div id="exchange" class="exchange"> Dump </div>
-            <div class="spacer"></div>
-            <button onclick="getOneTile()">Get A Tile</button>
+            <div class="actions">
+              <div class="spacer"></div>
+              <button onclick="getOneTile()">Get A Tile</button>
+              <div class="spacer"></div>
+            </div>
             <div class="spacer"></div>
           </div>
 
@@ -297,9 +304,10 @@
           <a href="https://www.youtube.com/watch?v=lIC6hH_GxUA&ab_channel=Bananagrams%2CInc." target="_blank">Game play video...</a>
         </div>
 
-        <div id="status" class="status">
+        <div class="status">
           <div>Status</div>
           <hr>
+          <ul id="status"></ul>
         </div>
       </div>
     </div>
@@ -318,6 +326,7 @@
       const tileBag = document.getElementById('tile-bag');
       const tileBoard = document.getElementById('tile-board');
       const exchange = document.getElementById('exchange');
+      const status = document.getElementById('status');
 
       let player = '';
       let gameid = '';
@@ -474,7 +483,7 @@
             }
           }
           else {
-
+            // don't do shit
 
           }
         }
@@ -495,6 +504,13 @@
           p.classList.add( msg.chat.player === player ? 'violet': 'teal' );
           chats.appendChild( p );
           p.scrollIntoView();
+        }
+
+        if (msg.status) {
+          const li = document.createElement('li');
+          li.innerText = msg.status;
+          status.appendChild(li);
+          li.scrollIntoView();
         }
         
         msg.myTilePool && updateMyBoard(msg);
@@ -566,11 +582,13 @@
         const canBoard = document.createElement('canvas');
         canBoard.width = dim * zoom;
         canBoard.height = dim * zoom;
+        const offsetC = 4;
+        const offsetR = 16;
         const ctx = canBoard.getContext("2d");
-        ctx.font = "16px monospace";
+        ctx.font = "22px monospace";
         for(let row = 0; row < dim; row++) {
           for(let col = 0; col < dim; col++) {
-            ctx.fillText(boardMap[`${col}-${row}`] || ' ', col * zoom, row * zoom);
+            ctx.fillText(boardMap[`${col}-${row}`] || ' ', col * zoom + offsetC, row * zoom + offsetR);
           }
         }
         canBoard.classList.add('player-boards');

@@ -225,18 +225,18 @@ class Bananagrams {
       // }
     };
     this.playerLanguages = {};
+    this.status = '';
   }
 
   onSocketMessage = (m) => {
     const msg = JSON.parse(m);
-    console.log(msg);
     this.lastUpdated = Date.now();
     if (msg.chat) this.chat(msg.chat);
     if (msg.startGame) this.startGame(msg.startGame);
     if (msg.selectLanguage) this.selectLanguage(msg.selectLanguage);
     if (msg.moveTile) this.moveTile(msg.moveTile);
     if (msg.exchangeTile) this.exchangeTile(msg.exchangeTile);
-    if (msg.getOneTile) this.distributeTile();
+    if (msg.getOneTile) this.distributeTile(msg.getOneTile);
 
   }
   onSocketClose = (e) => {
@@ -257,6 +257,7 @@ class Bananagrams {
 
   initPlayer = ( socket ) => {
     this.lastUpdated = Date.now();
+    this.status = `${socket.gamePlayer} - joined the game`;
     this.updateWatchers();
   }
 
@@ -305,10 +306,14 @@ class Bananagrams {
           })),
           myTilePool: this.playerBoards[socket.gamePlayer]?.getTilePool(),
         };
+        if (this.status) {
+          data.status = this.status;
+        }
 
         socket.send( JSON.stringify( data ) );
       }
     });
+    this.status = '';
   }
 
   selectLanguage = ({ language, player }) => {
@@ -328,16 +333,18 @@ class Bananagrams {
       const tileToReturn = playerBoard?.returnTile(tileId);
       const selectThree = this.tiles.returnTile(tileToReturn);
       playerBoard?.addThree(selectThree);
+      this.status = `${player} - exchanges a tile!`
       this.updateWatchers();
     }
   }
 
-  distributeTile = () => {
+  distributeTile = ({ player }) => {
     if (this.started) {
       this.players.forEach((player) => {
         let tile = this.tiles.selectTile();
         this.playerBoards[player].addTile(tile);
       });
+      this.status = `${player} - requests tile!`
       this.updateWatchers();
     }
   }
