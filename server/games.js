@@ -42,7 +42,7 @@ games.post( '/games', ctx => {
     const gameid = gameDb.createGame( type, player );
     const cookie = createSessionCookieSetttings();
     ctx.cookies.set(gameIdCookieName, gameid, cookie);
-    if (type === 'avalon') {
+    if (type === 'avalon' || type === 'bananagrams') {
       ctx.cookies.set(gamePlayerCookieName, player, cookie);
     }
     else {
@@ -69,7 +69,7 @@ games.post( '/games/:id', ctx => {
     game.players.push(player);
     const cookie = createSessionCookieSetttings();
     ctx.cookies.set(gameIdCookieName, gameid, cookie);
-    if (game.type === 'avalon') {
+    if (game.type === 'avalon' || game.type === 'bananagrams') {
       ctx.cookies.set(gamePlayerCookieName, player, cookie);
     }
     else {

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/icon.png" />
+    <link rel="stylesheet" href="/normalize.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bananagrams</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      .upsidedown {
+        transform: rotate(180deg);
+      }
+      .teal {
+        color:teal
+      }
+      .violet {
+        color:violet
+      }
+      .hide {
+        display: none !important;
+      }
+
+      #chats {
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        overflow-y: scroll;
+        border-bottom: 1px solid orangered;
+      }
+      #chats p {
+        padding: 3px;
+        margin: 0px;
+      }
+      textarea {
+        resize: none;
+        width: 98%;
+        border: none;
+        border-color: transparent;
+        padding: 3px;
+        margin: 2px;
+        box-sizing: border-box;
+        outline:none;
+      }
+      textarea:focus {
+        outline: none;
+      }
+      .chatarea {
+        background: seashell;
+        border-radius: 3px;
+        border: 2px solid orangered;
+        font-size: 12px;
+      }
+      .warn {
+        padding: 0px;
+        margin: 0px;
+        margin-top: 5px;
+        font-size: 10px;
+        color: red;
+        border-bottom: 1px solid orangered;
+      }
+
+      
+      .spacer {
+        flex-grow: 1
+      }
+
+      .content {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0px auto;
+        display: flex;
+        flex-direction: row;
+      }
+      .left-panel {
+        margin-top: 5px;
+        margin-left: 5px;
+        flex-grow: 1;
+      }
+      .right-panel {
+        margin-right: 5px;
+        min-width: 200px;
+        margin-top: 5px;
+      }
+
+      .waiting-room {
+        margin: 0px auto;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+      }
+      .waiting-player-box {
+        border: 1px solid burlywood;
+        margin-left: 10px;
+        padding: 3px;
+      }
+      .waiting-player-list {
+        min-height: 200px;
+        min-width: 150px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .waiting-player {
+        border: 1px solid burlywood;
+        margin: 4px;
+        padding: 4px;
+        min-width: 60px;
+        height: 60px;
+        line-height: 60px;
+        text-align: center;
+      }
+
+      .owner-actions {
+        border: 1px solid burlywood;
+        min-width: 150px;
+        padding: 3px;
+      }
+      .button-row {
+        text-align: center;
+      }
+
+      .status {
+        padding: 3px;
+        border: 1px solid burlywood;
+        border-radius: 5px;
+        margin: 3px;
+        height: 300px;
+        overflow-y: scroll;
+      }
+      .status > ul {
+        padding-left: 15px;
+      }
+
+      .mini-board-area {
+        padding: 5px;
+        border: 1px solid burlywood;
+        border-radius: 5px;
+        margin: 3px auto;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-around;
+      }
+      
+      .flexrow {
+        display: flex;
+        flex-direction: row;
+      }
+
+      .languages {
+        list-style-type: none;
+      }
+
+      .player-boards {
+        width: 150px;
+        height: 150px;
+        background-color: aliceblue;
+        border: 1px solid darkcyan;
+      }
+
+      .tile-board {
+        border: 1px solid brown;
+        width: fit-content;
+        background-color: bisque;
+      }
+      .tile-row {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+      }
+      .tile-square {
+        width: 32px;
+        height: 32px;
+        flex-grow: 0;
+        flex-shrink: 0;
+        padding: 2px;
+      }
+      .tile-piece {
+        width: 27px;
+        height: 27px;
+        border-radius: 5%;
+        border: 1px solid navy;
+        line-height: 27px;
+        text-align: center;
+        background-color: #e7ccdb;
+      }
+      .tile-bag {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-items: center;
+        min-width: 200px;
+        max-width: 300px;
+        height: 200px;
+        margin-top: 15px;
+        padding: 5px;
+        border-radius: 5px;
+        background-color: seashell;
+        border: 1px solid orangered;
+        overflow-y: scroll;
+      }
+      .tile-bag > .tile-piece {
+        margin: 5px;
+      }
+      .exchange {
+        padding: 60px;
+        border-radius: 5px;
+        margin-top: 15px;
+        width: 200px;
+        height: 200px;
+        text-align: center;
+        background-color: seashell;
+        border: 1px solid orangered;
+      }
+      .actions {
+        display: flex;
+        flex-direction: column;
+        padding: 5px;
+        border-radius: 5px;
+        margin-top: 15px;
+        height: 200px;
+        text-align: center;
+        background-color: seashell;
+        border: 1px solid orangered;
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <header onclick="window.location.assign('/')">
+      <div class="header">
+        <img src="/icon.png">
+        <img src="/go-icon.png">
+        <p>Bananagrams</p>
+        <img src="/go-icon.png">
+        <img src="/icon.png">
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="left-panel">
+
+        <div class="waiting-room" id="waiting-room-side">
+          <div class="waiting-player-box">
+            <p><b>Players in waiting room:</b></p>
+            <div id="players-list" class="waiting-player-list"></div>
+          </div>
+
+          <div class="owner-actions">
+            <p><b>Language:</b></p>
+            <ul class="languages">
+              <li><input name="language" type="radio" value="english" checked oninput="selectLanguage('english')"> English</input></li>
+              <li><input name="language" type="radio" value="ukrainian" oninput="selectLanguage('ukrainian')"> Ukrainian</input></li>
+            </ul>
+            <div id="owner-actions" class="hide">
+              <hr>
+              <div class="button-row">
+                <button id="start-button" class="hide" onclick="startGame()" disabled>Start Game</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="active-game" class="hide">
+          <div class="mini-board-area">
+            <div class="spacer"></div>
+            <div id="mini-boards"></div>
+            <div class="spacer"></div>
+          </div>
+
+          <div class="flexrow">
+            <div class="spacer"></div>
+            <div class="tile-board" id="tile-board"></div>
+            <div class="spacer"></div>
+          </div>
+
+          <div class="flexrow">
+            <div class="spacer"></div>
+            <div class="tile-bag" id="tile-bag"></div>
+            <div class="spacer"></div>
+            <div id="exchange" class="exchange">Drop tile here to exchange it for 3 tiles</div>
+            <div class="spacer"></div>
+            <div class="actions">
+              <div class="spacer"></div>
+              <button onclick="getOneTile()">Get A Tile</button>
+              <div class="spacer"></div>
+            </div>
+            <div class="spacer"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="right-panel">
+        <div class="chatarea">
+          <p class="warn">* Be warned, chats are visible to everyone!</p>
+          <div id="chats"></div>
+          <textarea id="chatin"></textarea>
+        </div>
+
+        <div>
+          <a href="https://www.youtube.com/watch?v=lIC6hH_GxUA&ab_channel=Bananagrams%2CInc." target="_blank">Game play video...</a>
+        </div>
+
+        <div class="status">
+          <div>Status</div>
+          <hr>
+          <ul id="status"></ul>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const playersList = document.getElementById( 'players-list' );
+      const chats = document.getElementById( 'chats' );
+      const chatinput = document.getElementById( 'chatin' );
+      const startButton = document.getElementById('start-button');
+      const ownerActions = document.getElementById('owner-actions');
+      const waitingView = document.getElementById('waiting-room-side');
+      const activeView = document.getElementById('active-game');
+      const playStatuses = document.getElementById('player-statuses');
+
+      const miniBoards = document.getElementById('mini-boards');
+      const tileBag = document.getElementById('tile-bag');
+      const tileBoard = document.getElementById('tile-board');
+      const exchange = document.getElementById('exchange');
+      const status = document.getElementById('status');
+
+      let player = '';
+      let gameid = '';
+      let samegame = false;
+      let isplaying = false;
+      let socket;
+      let minPlayers = 1000;
+      let maxPlayers = -1;
+      let isOwner = false;
+      let started = false;
+      let dimension = 20;
+
+      tileBag.ondragover = (ev) => {
+        ev.preventDefault();
+        tileBag.style.backgroundColor = 'green';
+      };
+      tileBag.ondragleave = (ev) => {
+        ev.preventDefault();
+        tileBag.style.backgroundColor = 'seashell';
+      };
+      tileBag.ondrop = (ev) => {
+        ev.preventDefault();
+        const tileId = ev.dataTransfer.getData( 'text/plain' );
+        const data = {
+          player,
+          row: -1,
+          col: -1,
+          tileId,
+        };
+        tileBag.style.backgroundColor = 'seashell';
+
+        sendMessage({ moveTile: data });
+      };
+
+      exchange.ondragover = (ev) => {
+        ev.preventDefault();
+        exchange.style.backgroundColor = 'green';
+      };
+      exchange.ondragleave = (ev) => {
+        ev.preventDefault();
+        exchange.style.backgroundColor = 'seashell';
+      };
+      exchange.ondrop = (ev) => {
+        ev.preventDefault();
+        const tileId = ev.dataTransfer.getData( 'text/plain' );
+        const data = {
+          player,
+          tileId,
+        };
+        exchange.style.backgroundColor = 'seashell';
+
+        sendMessage({ exchangeTile: data });
+      };
+
+
+      chatinput.addEventListener( 'keydown', sendChat );
+
+      function sendChat( ev ) {
+        if ( ev.keyCode === 13 ) { // enter key
+          ev.preventDefault();
+          ev.stopPropagation();
+          const text = chatinput.value;
+          if (text.trim().length > 0) {
+            sendMessage({ chat: { player, text }})
+          }
+          chatinput.value = '';
+          chatinput.selectionStart = 0;
+        }
+      }
+
+      function startGame() {
+        if (isOwner) {
+          sendMessage({
+            startGame: {
+              player,
+            }
+          });
+        }
+      }
+
+      function selectLanguage(language) {
+        sendMessage({ selectLanguage: { player, language } });
+      }
+
+      window.onload = () => {
+        const cookies = {}
+        document.cookie.split(';').map( c => {
+          const [key, val] = c.split('=');
+          if ( /shogi-or-go-id/.test( key ) ) {
+            cookies.gameid = val;
+          }
+          else if ( /shogi-or-go-is-player/.test( key ) ) {
+            cookies.player = val;
+          }
+        });
+        const ingame = window.location.pathname.split('/')[2];
+        samegame = ingame === cookies.gameid;
+        isplaying = samegame && cookies.player;
+
+        // add an additional chack that player is playing THIS game
+
+        if ( isplaying ) {
+          player = cookies.player;
+        }
+        console.log( 'gameid', ingame, samegame ? 'playing':  'watching' );
+        if ( !isplaying ) {
+          chatinput.classList.add( 'hide' );
+        }
+
+        const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsPort = window.location.port ? `:${window.location.port}` : '';
+        const wsUrl = `${wsProto}://${window.location.hostname}${wsPort}/websocket/${ingame}`;
+        socket = new WebSocket( wsUrl );
+        socket.addEventListener('open', (ev) => {
+          console.log('WebSocket open event:', ev);
+        });
+        socket.addEventListener('message', socketMessage);
+        socket.addEventListener('error', genericError);
+      };
+
+      function socketMessage( m ) {
+        const msg = JSON.parse(m.data);
+        console.log(msg);
+
+        if(msg.started) {
+          started = true;
+          waitingView.classList.add('hide');
+          activeView.classList.remove('hide');
+        }
+
+        if ( msg.minPlayers || msg.maxPlayers ) {
+          minPlayers = msg.minPlayers;
+          maxPlayers = msg.maxPlayers;
+        }
+
+        if (msg.started) {
+          console.log('msg.started')
+          
+        }
+
+        if ( msg.players) {
+          console.log('msg.players')
+          if (!started) {
+            const numPlayers = msg.players?.length;
+            playersList.innerText = "";
+            for (let pl of msg.players) {
+              const p = document.createElement( 'p' );
+              p.innerText = pl;
+              p.classList.add('waiting-player');
+              playersList.append(p);
+            }
+            if (numPlayers >= minPlayers && numPlayers <= maxPlayers) {
+              startButton.disabled = false;
+            }
+          }
+          else {
+            // don't do shit
+
+          }
+        }
+
+        if (msg.owner === player) {
+          isOwner = true;
+          ownerActions.classList.remove('hide');
+          startButton.classList.remove('hide');
+        }
+        
+        if ( msg.message ) {
+          alert( msg.message );
+        }
+
+        if ( msg.chat ) {
+          const p = document.createElement( 'p' );
+          p.innerText = `${msg.chat.player}: ${msg.chat.text}`;
+          p.classList.add( msg.chat.player === player ? 'violet': 'teal' );
+          chats.appendChild( p );
+          p.scrollIntoView();
+        }
+
+        if (msg.status) {
+          const li = document.createElement('li');
+          li.innerText = msg.status;
+          status.appendChild(li);
+          li.scrollIntoView();
+        }
+        
+        msg.myTilePool && updateMyBoard(msg);
+        msg.playerBoards && updatePlayerBoards(msg.playerBoards);
+      }
+
+      function startQuest() {
+        sendMessage({ startQuest: true });
+      }
+
+      function genericError( e ) {
+        if ( e.isTrusted ) {
+          console.log( e );
+          alert( e );
+        }
+        else {
+          console.log( e.message || e );
+          alert( e.message || e );
+        }
+      }
+
+      function sendMessage( data ) {
+        const msg = JSON.stringify( data );
+        if ( socket && socket.readyState === socket.OPEN) { 
+          socket.send( msg );
+        }
+        else {
+          alert( 'Failed - Socket Closed' );
+        }
+      }
+
+
+      function updateMyBoard({ playerBoards, myTilePool }) {
+        const { board = [] } = playerBoards.find(b => b.player === player);
+
+        tileBag.innerText = '';
+        myTilePool.forEach(tile => {
+          const tileEl = createPiece(tile);
+          tileBag.appendChild(tileEl);
+        });
+
+        createMainBoard();
+
+        board.forEach(tile => {
+          const tileEl = createPiece(tile);
+          document.getElementById(`${tile.col}-${tile.row}`).appendChild(tileEl);
+        });
+      }
+
+      function updatePlayerBoards(playerBoards) {
+        miniBoards.innerText = '';
+        playerBoards?.forEach(playerData => {
+          if (playerData.player !== player) {
+            const board = createMiniBoards(playerData);
+            miniBoards.appendChild(board);
+          }
+        });
+      }
+
+      function createMiniBoards(data) {
+        const { board = [], player } = data;
+        const boardMap = board.reduce((map, curr) => {
+          map[`${curr.col}-${curr.row}`] = curr[curr.language];
+          return map;
+        }, {});
+
+        const dim = dimension;
+        const zoom = 20;
+        const canBoard = document.createElement('canvas');
+        canBoard.width = dim * zoom;
+        canBoard.height = dim * zoom;
+        const offsetC = 4;
+        const offsetR = 16;
+        const ctx = canBoard.getContext("2d");
+        ctx.font = "22px monospace";
+        for(let row = 0; row < dim; row++) {
+          for(let col = 0; col < dim; col++) {
+            ctx.fillText(boardMap[`${col}-${row}`] || ' ', col * zoom + offsetC, row * zoom + offsetR);
+          }
+        }
+        canBoard.classList.add('player-boards');
+
+        const name = document.createElement('div');
+        name.innerText = player;
+        name.classList.add('button-row');
+
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(canBoard);
+        wrapper.appendChild(name);
+        
+        return wrapper;
+      }
+
+      function createPiece(p) {
+        const tile = document.createElement( 'div' );
+        tile.id = p.id;
+        tile.innerText = p[p.language];
+        tile.classList.add( 'tile-piece' );
+        tile.draggable = true;
+        tile.addEventListener( 'dragstart', (ev) => {
+          ev.dataTransfer.setData( 'text/plain', p.id );
+          ev.dataTransfer.dropEffect = 'move';
+        });
+        return tile;
+      };
+
+      function createMainBoard() {
+        tileBoard.innerText = '';
+        const rows = [];
+        const dim = dimension;
+        for( let r = 0; r < dim; r++ ) {
+          const row = document.createElement( 'div' );
+          row.classList.add( 'tile-row' );
+          const cols =   [];
+
+          for( let c = 0; c < dim; c++ ) {
+            const square = document.createElement( 'div' );
+            square.classList.add( 'tile-square' );
+            
+            square.id = `${c}-${r}`;
+            square.dataset.row = r;
+            square.dataset.col = c;
+
+            square.ondragover = (ev) => {
+              ev.preventDefault();
+              square.style.backgroundColor = 'green';
+            };
+            square.ondragleave = (ev) => {
+              ev.preventDefault();
+              square.style.backgroundColor = 'bisque';
+            };
+            square.ondrop = (ev) => {
+              ev.preventDefault();
+              const tileId = ev.dataTransfer.getData( 'text/plain' );
+              const data = {
+                player,
+                row: r,
+                col: c,
+                tileId,
+              };
+
+              square.style.backgroundColor = 'bisque';
+
+              sendMessage({ moveTile: data });
+            };
+            row.appendChild( square );
+            cols.push( square );
+          }
+          tileBoard.appendChild( row );
+          rows.push( cols );
+        }
+      }
+
+      function getOneTile() {
+        sendMessage({ getOneTile: { player } });
+      }
+    </script>
+  </body>
+</html>
