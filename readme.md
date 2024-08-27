@@ -2,7 +2,7 @@
 
 A simple implementation of socket based Shogi and Go boards.
 
-Deployed: [Shogi or Go](http://games.hiteshlala.info)
+Deployed: [Shogi or Go](http://games.chobek.com)
 
 * No game rules implemented - these are player enforced
 * Users can join a game 2 person
